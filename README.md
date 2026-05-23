@@ -30,6 +30,77 @@ Dados em `data/` são **locais e não versionados**. Versionamos código, notebo
 
 **Fluxo:** explorar aqui → promover findings estáveis para `docs/conjuntos/{slug}.md` no atlas. O atlas é o manual de integração; este repo é o laboratório que o alimenta.
 
+## Fluxo de processamento
+
+Pipeline local por estudo (ex.: tancagem), orquestrado por [`config/monorepo.yaml`](config/monorepo.yaml) e `pipelines/run.py`:
+
+```mermaid
+flowchart LR
+  ANP[Portal ANP]
+  R1[raw — Python download]
+  R2[raw_prepare — Python]
+  T[trusted — SQL DuckDB]
+  U[trusted_uf — SQL]
+  F[refined — SQL]
+  NB[notebooks exploratórios]
+  Atlas[anp-data-atlas docs]
+
+  ANP --> R1 --> R2 --> T --> U
+  T --> F
+  R1 --> NB
+  T --> NB
+  NB -->|promover estável| Atlas
+```
+
+| Etapa | Engine | Entrada | Saída |
+|-------|--------|---------|-------|
+| `raw` | Python | URLs ANP | `data/raw/{slug}/` |
+| `raw_prepare` | Python | XLSX legados (ex. out/2022) | CSV em `data/raw/` |
+| `trusted` | SQL | `data/raw/**/*.csv` | `data/trusted/{slug}/tancagem.parquet` |
+| `trusted_uf` | SQL | trusted | `data/trusted/{slug}/uf/{UF}.parquet` |
+| `refined` | SQL | trusted | `data/refined/{slug}/*.parquet` |
+
+```bash
+py pipelines/run.py tancagem-abastecimento          # todas as etapas
+py pipelines/run.py tancagem-abastecimento trusted  # uma etapa
+```
+
+**RAW** permanece em Python (download e preparação). **TRUSTED** e **REFINED** usam arquivos `.sql` em `pipelines/sql/{slug}/`, executados via DuckDB com variáveis `{{RAW_DIR}}`, `{{TRUSTED_PARQUET}}`, etc.
+
+## O que promover para o atlas (e o que não)
+
+### Promover (sim)
+
+| Tipo | Exemplo | Destino no atlas |
+|------|---------|------------------|
+| Inventário por arquivo | linhas e m³ por `2025/janeiro.csv` | Inventário empírico |
+| Chave sem duplicatas | `Data` + `CodInstalacao` + `Tag` + `GrupoDeProdutos` | Qualidade e chaves |
+| Tipos reais observados | `Cnpj` como string, não float | Estrutura dos arquivos |
+| Domínios categóricos | 11 `Segmento`, 4 `GrupoDeProdutos` | Estrutura / qualidade |
+| Anomalia documentada | nov/dez 2022 −44% m³ vs jun–out | Anomalias conhecidas |
+| Regra de soma | agregar `TancagemM3` na granularidade da chave | Qualidade e chaves |
+
+### Não promover (manter aqui)
+
+| Tipo | Exemplo | Onde ficar |
+|------|---------|------------|
+| Notebook completo | `01_perfil_exploratorio.ipynb` | `estudos/{slug}/notebooks/` |
+| Gráficos e rankings | evolução GO vs SP | Notebook |
+| TODO / hipótese | escopo `tancagem_terminais_*` em 2022 | `estudos/{slug}/TODO.md` |
+| SQL e orquestrador | `trusted.sql`, `run.py` | `pipelines/` |
+| Parquets locais | `tancagem.parquet` | `data/` (gitignored) |
+
+### Critérios (checklist)
+
+Antes de editar o atlas, confira:
+
+1. **Reproduzível** — resultado verificável nos CSVs brutos ou no trusted.
+2. **Útil para integração** — ETL, chaves, lacunas, armadilhas de nomenclatura.
+3. **Estável** — revisado; não é rascunho de célula em andamento.
+4. **Referenciável** — cite notebook (`01_perfil…`), arquivo fonte e data do snapshot.
+
+Se ainda estiver em investigação, use `TODO.md` e promova só quando fechar.
+
 ## Estudos
 
 | Estudo | Slug | Foco |
@@ -71,15 +142,7 @@ jupyter lab
 
 ## Pipeline (ex.: tancagem)
 
-Na raiz do repositório:
-
-```bash
-# Todas as etapas
-py pipelines/run.py tancagem-abastecimento
-
-# Uma etapa
-py pipelines/run.py tancagem-abastecimento trusted
-```
+Detalhes das etapas na seção [Fluxo de processamento](#fluxo-de-processamento) acima.
 
 | Etapa | Engine | Saída principal |
 |-------|--------|-----------------|
@@ -91,15 +154,24 @@ py pipelines/run.py tancagem-abastecimento trusted
 
 ## Fluxo com o atlas
 
+Complemento ao [fluxo de processamento](#fluxo-de-processamento) local — relação entre os dois repositórios:
+
 ```mermaid
 flowchart LR
   ANP[Portal ANP]
-  Fuel[anp-fuel-analytics]
-  Atlas[anp-data-atlas]
-  ANP -->|CSV brutos| Fuel
-  Fuel -->|descobertas em notebooks| Atlas
-  Atlas -->|integração histórica| Atlas
+  FuelETL[fuel — raw/trusted/refined]
+  FuelNB[fuel — notebooks]
+  AtlasDoc[atlas — docs/conjuntos]
+  AtlasETL[atlas — integração histórica]
+
+  ANP --> FuelETL
+  FuelETL --> FuelNB
+  FuelNB -->|promover estável| AtlasDoc
+  ANP --> AtlasDoc
+  AtlasETL --> AtlasDoc
 ```
+
+O atlas documenta **o quê** integrar; o fuel-analytics prova **como** e gera camadas locais para análise.
 
 ## Licença
 
