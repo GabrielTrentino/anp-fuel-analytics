@@ -24,9 +24,8 @@
 
 | Notebook | Objetivo exploratório | Pode alimentar o atlas |
 |----------|----------------------|-------------------------|
-| [01_perfil_exploratorio.ipynb](notebooks/01_perfil_exploratorio.ipynb) | Schema, nulos, cardinalidade, domínios categóricos | Tabela de valores de `Segmento`, `GrupoDeProdutos`, etc. |
-| [02_qualidade_chave.ipynb](notebooks/02_qualidade_chave.ipynb) | Chave lógica, duplicatas, `TancagemM3`, CNPJ | Seção “granularidade e agregação” |
-| [03_piloto_temporal.ipynb](notebooks/03_piloto_temporal.ipynb) | Inventário dos arquivos baixados, linhas por snapshot | Notas para pipeline de integração histórica no atlas |
+| [01_perfil_exploratorio.ipynb](notebooks/01_perfil_exploratorio.ipynb) | Perfil raw, qualidade/chave e inventário temporal (unificado) | Domínios categóricos, granularidade, notas para integração histórica |
+| [02_estrutura_trusted.ipynb](notebooks/02_estrutura_trusted.ipynb) | Estrutura do parquet trusted, dtypes e nulos por coluna | Seção de qualidade / schema no atlas |
 
 ## Pipelines
 

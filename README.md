@@ -18,7 +18,7 @@ Dados em `data/` são **locais e não versionados**. Versionamos código, notebo
 
 | Estudo | Pasta | Foco exploratório |
 |--------|-------|-------------------|
-| Tancagem do Abastecimento Nacional | [estudos/tancagem-abastecimento/](estudos/tancagem-abastecimento/) | Perfil, chave lógica, piloto temporal |
+| Tancagem do Abastecimento Nacional | [estudos/tancagem-abastecimento/](estudos/tancagem-abastecimento/) | Exploração raw + estrutura trusted |
 
 ## Estrutura
 
