@@ -1,58 +1,68 @@
 # anp-fuel-analytics
 
-Monorepo de **estudos** sobre dados abertos de combustíveis da ANP, com foco em **transformação de dados** (ingestão, limpeza, harmonização) e análises derivadas. Cada estudo vive em sua própria pasta, com pipelines, notebooks e artefatos locais.
-
-Complementa o [anp-data-atlas](https://github.com/GabrielTrentino/anp-data-atlas): o atlas documenta fontes, metadados e contexto; **este repositório implementa o trabalho analítico**.
+Monorepo de **análises exploratórias** sobre dados abertos de combustíveis da ANP. Aqui testamos hipóteses, perfilamos colunas e validamos qualidade — o que for estável e útil para outros projetos **volta documentado** no [anp-data-atlas](https://github.com/GabrielTrentino/anp-data-atlas).
 
 ## Objetivo
 
-Reunir, de forma reproduzível, o caminho desde os **CSV brutos** da ANP até **métricas e visões** úteis para entender o abastecimento nacional — começando pela **tancagem autorizada a operar**, sem misturar documentação de referência com código de transformação.
+Executar estudos reproduzíveis (notebooks + scripts leves) que respondem: *como são os dados na prática?* — antes de construir integração histórica ou produtos analíticos.
 
-Em cada estudo buscamos:
+| Este repositório (`anp-fuel-analytics`) | [anp-data-atlas](https://github.com/GabrielTrentino/anp-data-atlas) |
+|----------------------------------------|---------------------------------------------------------------------|
+| **Exploração** — perfil, categorias, duplicatas, séries piloto | **Referência** — catálogo, metadados, dicionário, matriz de arquivos |
+| Notebooks e protótipos de transformação | **Integração histórica** — pipeline que consolida a série no tempo (raw → série utilizável) |
+| Descobertas alimentam o atlas (seções novas no `.md`) | Documentação permanente para quem for integrar ou analisar |
 
-1. **Ingerir** os arquivos publicados no portal da ANP  
-2. **Transformar** (tempo, qualidade, agregações) em camadas utilizáveis  
-3. **Analisar** conforme um roteiro explícito de perguntas de negócio  
-
-Dados brutos e processados permanecem **fora do Git** (`data/` local). O que versionamos é código, notebooks e documentação do estudo.
+Dados em `data/` são **locais e não versionados**. Versionamos código, notebooks e READMEs dos estudos.
 
 ## Estudos
 
-| Estudo | Pasta | Status |
-|--------|-------|--------|
-| Tancagem do Abastecimento Nacional de Combustíveis | [estudos/tancagem-abastecimento/](estudos/tancagem-abastecimento/) | Em andamento |
+| Estudo | Pasta | Foco exploratório |
+|--------|-------|-------------------|
+| Tancagem do Abastecimento Nacional | [estudos/tancagem-abastecimento/](estudos/tancagem-abastecimento/) | Perfil, chave lógica, piloto temporal |
 
-Novos conjuntos da ANP entram como pastas em `estudos/{slug}/`, após estarem catalogados no atlas.
-
-## Estrutura do monorepo
+## Estrutura
 
 ```
 anp-fuel-analytics/
-├── estudos/
-│   └── tancagem-abastecimento/   # README do estudo + pipelines + notebooks
-├── data/                         # local — não versionado (por estudo, sob data/)
+├── data/                              # local — não versionado
+│   └── raw/{slug}/
+├── estudos/{slug}/
+│   ├── README.md
+│   ├── pipelines/                     # download e protótipos de ETL
+│   └── notebooks/                     # análises exploratórias
+├── requirements.txt
 └── README.md
 ```
 
-Padrão sugerido dentro de cada estudo:
+## Ambiente
 
+```bash
+py -3 -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+jupyter lab
 ```
-estudos/{slug}/
-├── README.md
-├── pipelines/
-├── notebooks/
-└── src/              # opcional
+
+Download dos CSV (ex.: tancagem):
+
+```bash
+py estudos/tancagem-abastecimento/pipelines/download_raw.py
 ```
 
-## Repositórios relacionados
+## Fluxo com o atlas
 
-| Repositório | Papel |
-|-------------|--------|
-| [anp-data-atlas](https://github.com/GabrielTrentino/anp-data-atlas) | Referência: catálogo, dicionários, URLs, lacunas |
-| **anp-fuel-analytics** | Monorepo de estudos: transformação e análise |
+```mermaid
+flowchart LR
+  ANP[Portal ANP]
+  Fuel[anp-fuel-analytics]
+  Atlas[anp-data-atlas]
+  ANP -->|CSV brutos| Fuel
+  Fuel -->|descobertas em notebooks| Atlas
+  Atlas -->|integração histórica| Atlas
+```
 
 ## Licença
 
-Código sob [MIT](LICENSE). Dados originais da ANP sujeitos aos termos da agência.
+[MIT](LICENSE) — código. Dados ANP: termos da agência.
 
 https://github.com/GabrielTrentino/anp-fuel-analytics
