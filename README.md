@@ -14,6 +14,22 @@ Executar estudos reproduzíveis (notebooks + pipelines) que respondem: *como sã
 
 Dados em `data/` são **locais e não versionados**. Versionamos código, notebooks, SQL e READMEs dos estudos.
 
+## O que cada repositório guarda
+
+| Conteúdo | **anp-fuel-analytics** (este repo) | **[anp-data-atlas](https://github.com/GabrielTrentino/anp-data-atlas)** |
+|----------|-----------------------------------|--------------------------------------------------------------------------|
+| Metadados oficiais ANP | Link para o atlas | Sim — `docs/conjuntos/` |
+| Matriz de URLs e lacunas do portal | Referência ao atlas | Sim |
+| Inventário empírico dos brutos (linhas, m³, `Data` por arquivo) | Notebooks (ex.: `01_perfil_exploratorio`) | Promovido quando estável |
+| Schema confirmado na prática | Tabelas e código nos notebooks | Resumo em Markdown |
+| Chave candidata, regras de agregação | Validação exploratória | Documentação de integração |
+| Anomalias em investigação | `TODO.md` do estudo | Achados confirmados |
+| Gráficos, `describe()`, experimentos | Sim | Não |
+| Camadas raw / trusted / refined | Sim — `pipelines/` | Não |
+| Pipelines de integração histórica | Protótipos por estudo | Série consolidada documentada |
+
+**Fluxo:** explorar aqui → promover findings estáveis para `docs/conjuntos/{slug}.md` no atlas. O atlas é o manual de integração; este repo é o laboratório que o alimenta.
+
 ## Estudos
 
 | Estudo | Slug | Foco |
