@@ -43,6 +43,14 @@ pip install -r requirements.txt
 jupyter lab
 ```
 
+Se o gráfico falhar com *matplotlib is required*, instale no mesmo ambiente do kernel Jupyter:
+
+```bash
+pip install matplotlib
+```
+
+Depois reinicie o kernel do notebook.
+
 Tancagem — raw + trusted:
 
 ```bash

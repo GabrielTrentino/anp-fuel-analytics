@@ -25,7 +25,7 @@
 | Notebook | Objetivo exploratório | Pode alimentar o atlas |
 |----------|----------------------|-------------------------|
 | [01_perfil_exploratorio.ipynb](notebooks/01_perfil_exploratorio.ipynb) | Perfil raw, qualidade/chave e inventário temporal (unificado) | Domínios categóricos, granularidade, notas para integração histórica |
-| [02_estrutura_trusted.ipynb](notebooks/02_estrutura_trusted.ipynb) | Estrutura do parquet trusted, dtypes e nulos por coluna | Seção de qualidade / schema no atlas |
+| [02_estrutura_trusted.ipynb](notebooks/02_estrutura_trusted.ipynb) | Estrutura trusted, nulos, ranking por UF e evolução em GO | Seção de qualidade / schema no atlas |
 
 ## Pipelines
 
