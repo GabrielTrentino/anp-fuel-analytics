@@ -1,0 +1,48 @@
+# Configuração compartilhada do monorepo anp-fuel-analytics.
+# Caminhos são relativos à raiz do repositório.
+
+repo:
+  name: anp-fuel-analytics
+  atlas_repo: anp-data-atlas  # referência documental (GitHub / path local)
+
+layers:
+  - raw       # Python — download e preparação
+  - trusted   # SQL — consolidação
+  - refined   # SQL — agregações analíticas
+
+paths:
+  data: data
+  pipelines: pipelines
+  sql: pipelines/sql
+  python: pipelines/python
+
+studies:
+  tancagem-abastecimento:
+    slug: tancagem-abastecimento
+    title: Tancagem do Abastecimento Nacional de Combustíveis
+    atlas_doc: docs/conjuntos/tancagem-abastecimento.md  # no repositório anp-data-atlas
+    notebooks: estudos/tancagem-abastecimento/notebooks
+    trusted_uf_split: [GO, TO, DF]
+    paths:
+      raw: data/raw/tancagem-abastecimento
+      trusted: data/trusted/tancagem-abastecimento
+      trusted_uf: data/trusted/tancagem-abastecimento/uf
+      refined: data/refined/tancagem-abastecimento
+    pipeline:
+      - step: raw
+        engine: python
+        script: pipelines/python/download_tancagem.py
+      - step: raw_prepare
+        engine: python
+        script: pipelines/python/prepare_tancagem_raw.py
+      - step: trusted
+        engine: sql
+        script: pipelines/sql/tancagem-abastecimento/trusted.sql
+        output: data/trusted/tancagem-abastecimento/tancagem.parquet
+      - step: trusted_uf
+        engine: sql
+        script: pipelines/sql/tancagem-abastecimento/split_trusted_ufs.sql
+      - step: refined
+        engine: sql
+        script: pipelines/sql/tancagem-abastecimento/refined.sql
+        output: data/refined/tancagem-abastecimento/tancagem_por_mes_uf_grupo_tag.parquet
