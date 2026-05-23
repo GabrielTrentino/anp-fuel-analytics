@@ -4,32 +4,42 @@ Monorepo de **análises exploratórias** sobre dados abertos de combustíveis da
 
 ## Objetivo
 
-Executar estudos reproduzíveis (notebooks + scripts leves) que respondem: *como são os dados na prática?* — antes de construir integração histórica ou produtos analíticos.
+Executar estudos reproduzíveis (notebooks + pipelines) que respondem: *como são os dados na prática?* — antes de construir integração histórica ou produtos analíticos.
 
 | Este repositório (`anp-fuel-analytics`) | [anp-data-atlas](https://github.com/GabrielTrentino/anp-data-atlas) |
 |----------------------------------------|---------------------------------------------------------------------|
 | **Exploração** — perfil, categorias, duplicatas, séries piloto | **Referência** — catálogo, metadados, dicionário, matriz de arquivos |
-| Notebooks e protótipos de transformação | **Integração histórica** — pipeline que consolida a série no tempo (raw → série utilizável) |
+| Notebooks e pipelines de transformação | **Integração histórica** — pipeline que consolida a série no tempo |
 | Descobertas alimentam o atlas (seções novas no `.md`) | Documentação permanente para quem for integrar ou analisar |
 
-Dados em `data/` são **locais e não versionados**. Versionamos código, notebooks e READMEs dos estudos.
+Dados em `data/` são **locais e não versionados**. Versionamos código, notebooks, SQL e READMEs dos estudos.
 
 ## Estudos
 
-| Estudo | Pasta | Foco exploratório |
-|--------|-------|-------------------|
-| Tancagem do Abastecimento Nacional | [estudos/tancagem-abastecimento/](estudos/tancagem-abastecimento/) | Exploração raw + estrutura trusted |
+| Estudo | Slug | Foco |
+|--------|------|------|
+| Tancagem do Abastecimento Nacional | [tancagem-abastecimento](estudos/tancagem-abastecimento/) | raw → trusted → refined |
+
+Configuração compartilhada entre estudos: [`config/monorepo.yaml`](config/monorepo.yaml).
 
 ## Estrutura
 
 ```
 anp-fuel-analytics/
-├── data/                              # local — não versionado
-│   └── raw/{slug}/
+├── config/
+│   └── monorepo.yaml              # estudos, caminhos e etapas do pipeline
+├── pipelines/
+│   ├── run.py                     # orquestrador: py pipelines/run.py <slug> [step]
+│   ├── core/                       # config + executor SQL (DuckDB)
+│   ├── python/                    # etapas RAW (download, prepare)
+│   └── sql/{slug}/                # etapas TRUSTED e REFINED
+├── data/                          # local — não versionado
+│   ├── raw/{slug}/
+│   ├── trusted/{slug}/
+│   └── refined/{slug}/
 ├── estudos/{slug}/
 │   ├── README.md
-│   ├── pipelines/                     # download e protótipos de ETL
-│   └── notebooks/                     # análises exploratórias
+│   └── notebooks/
 ├── requirements.txt
 └── README.md
 ```
@@ -43,22 +53,25 @@ pip install -r requirements.txt
 jupyter lab
 ```
 
-Se o gráfico falhar com *matplotlib is required*, instale no mesmo ambiente do kernel Jupyter:
+## Pipeline (ex.: tancagem)
+
+Na raiz do repositório:
 
 ```bash
-pip install matplotlib
+# Todas as etapas
+py pipelines/run.py tancagem-abastecimento
+
+# Uma etapa
+py pipelines/run.py tancagem-abastecimento trusted
 ```
 
-Depois reinicie o kernel do notebook.
-
-Tancagem — raw + trusted:
-
-```bash
-py estudos/tancagem-abastecimento/pipelines/download_raw.py
-py estudos/tancagem-abastecimento/pipelines/build_trusted.py
-```
-
-Camadas locais: `data/raw/{slug}/` → `data/trusted/{slug}/` (parquet unificado).
+| Etapa | Engine | Saída principal |
+|-------|--------|-----------------|
+| `raw` | Python | `data/raw/tancagem-abastecimento/` |
+| `raw_prepare` | Python | CSV derivados (ex.: out/2022 XLSX) |
+| `trusted` | SQL | `data/trusted/.../tancagem.parquet` |
+| `trusted_uf` | SQL | `data/trusted/.../uf/{GO,TO,DF}.parquet` |
+| `refined` | SQL | `data/refined/.../tancagem_por_mes_uf_grupo_tag.parquet` |
 
 ## Fluxo com o atlas
 
