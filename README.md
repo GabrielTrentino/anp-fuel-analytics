@@ -43,11 +43,14 @@ pip install -r requirements.txt
 jupyter lab
 ```
 
-Download dos CSV (ex.: tancagem):
+Tancagem — raw + trusted:
 
 ```bash
 py estudos/tancagem-abastecimento/pipelines/download_raw.py
+py estudos/tancagem-abastecimento/pipelines/build_trusted.py
 ```
+
+Camadas locais: `data/raw/{slug}/` → `data/trusted/{slug}/` (parquet unificado).
 
 ## Fluxo com o atlas
 

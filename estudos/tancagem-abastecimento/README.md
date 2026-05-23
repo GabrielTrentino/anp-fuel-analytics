@@ -28,11 +28,30 @@
 | [02_qualidade_chave.ipynb](notebooks/02_qualidade_chave.ipynb) | Chave lógica, duplicatas, `TancagemM3`, CNPJ | Seção “granularidade e agregação” |
 | [03_piloto_temporal.ipynb](notebooks/03_piloto_temporal.ipynb) | Inventário dos arquivos baixados, linhas por snapshot | Notas para pipeline de integração histórica no atlas |
 
-## Download dos brutos
+## Pipelines
 
 ```bash
 # na raiz de anp-fuel-analytics
+
+# 1. Brutos (portal ANP)
 py estudos/tancagem-abastecimento/pipelines/download_raw.py
+
+# 2. Trusted — união de todos os CSV/XLSX
+py estudos/tancagem-abastecimento/pipelines/build_trusted.py
+```
+
+### Camada trusted
+
+| Saída | Descrição |
+|-------|-----------|
+| `data/trusted/tancagem-abastecimento/tancagem.parquet` | Todos os snapshots empilhados (~492k linhas, 36 arquivos) |
+| `data/trusted/tancagem-abastecimento/manifest.json` | Inventário por arquivo fonte |
+
+Colunas originais + `_source_file`, `_source_year`, `_source_period`. Tipos normalizados (`Data` datetime, `TancagemM3` numérico).
+
+```python
+import pandas as pd
+df = pd.read_parquet("data/trusted/tancagem-abastecimento/tancagem.parquet")
 ```
 
 ## Análises recomendadas (escopo futuro)
@@ -43,6 +62,7 @@ Lista completa no atlas (ranking empresas, geografia, HHI, etc.). Este repo impl
 
 | Item | Situação |
 |------|----------|
-| Download CSV | Script em `pipelines/download_raw.py` |
-| Notebooks exploratórios | Iniciais em `notebooks/` |
-| Integração histórica | Planejada no **anp-data-atlas** |
+| Download raw | `pipelines/download_raw.py` |
+| Camada trusted | `pipelines/build_trusted.py` — **concluído** |
+| Notebooks exploratórios | `notebooks/` |
+| Série mensal harmonizada (ref) | Planejada no **anp-data-atlas** |

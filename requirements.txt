@@ -1,4 +1,5 @@
 pandas>=2.0
+pyarrow>=14.0
 jupyter>=1.0
 jupyterlab>=4.0
 openpyxl>=3.1
