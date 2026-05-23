@@ -57,6 +57,10 @@ df = pd.read_parquet("data/trusted/tancagem-abastecimento/tancagem.parquet")
 
 Lista completa no atlas (ranking empresas, geografia, HHI, etc.). Este repo implementa primeiro a **exploração** que destrava a integração histórica; análises de negócio podem vir em notebooks adicionais ou em outros projetos.
 
+## TODOs / investigações abertas
+
+- **[TODO.md](TODO.md)** — queda de tancagem em **nov/dez 2022** (~44% abaixo de jun–out/2022)
+
 ## Status
 
 | Item | Situação |
