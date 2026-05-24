@@ -46,3 +46,26 @@ studies:
         engine: sql
         script: pipelines/sql/tancagem-abastecimento/refined.sql
         output: data/refined/tancagem-abastecimento/tancagem_por_mes_uf_grupo_tag.parquet
+  movimentacao-derivados:
+    slug: movimentacao-derivados
+    title: Movimentação de derivados de petróleo, gás natural e biocombustíveis
+    atlas_doc: docs/conjuntos/movimentacao-derivados.md
+    notebooks: estudos/movimentacao-derivados/notebooks
+    products:
+      - liquidos
+      - glp
+      - lubrificante
+      - trr
+      - aviacao
+      - asfalto
+      - solvente
+      - fornecedores-vendas-diretas
+      - movimentacaologistica
+    paths:
+      raw: data/raw/movimentacao-derivados
+      trusted: data/trusted/movimentacao-derivados
+      refined: data/refined/movimentacao-derivados
+    pipeline:
+      - step: raw
+        engine: python
+        script: pipelines/python/download_movimentacao_derivados.py
