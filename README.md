@@ -103,9 +103,30 @@ Se ainda estiver em investigação, use `TODO.md` e promova só quando fechar.
 
 ## Estudos
 
-| Estudo | Slug | Foco |
-|--------|------|------|
-| Tancagem do Abastecimento Nacional | [tancagem-abastecimento](estudos/tancagem-abastecimento/) | raw → trusted → refined |
+Prioridade e status: [TODO.md](TODO.md). Documentação de referência no [anp-data-atlas](https://github.com/GabrielTrentino/anp-data-atlas/tree/main/docs/conjuntos).
+
+| Estudo | Slug | Status |
+|--------|------|--------|
+| Tancagem do Abastecimento Nacional | [tancagem-abastecimento](estudos/tancagem-abastecimento/) | pipeline ◐ |
+| Movimentação de derivados | [movimentacao-derivados](estudos/movimentacao-derivados/) | planejado |
+| Cadastro revendas combustíveis | [cadastro-revendas-combustiveis](estudos/cadastro-revendas-combustiveis/) | planejado |
+| Cadastro revendas GLP | [cadastro-revendas-glp](estudos/cadastro-revendas-glp/) | planejado |
+| Pontos de abastecimento | [pontos-abastecimento](estudos/pontos-abastecimento/) | planejado |
+| Distribuidores combustíveis líquidos | [distribuidores-combustiveis-liquidos](estudos/distribuidores-combustiveis-liquidos/) | planejado |
+| PMQC | [pmqc](estudos/pmqc/) | planejado |
+| PML | [pml](estudos/pml/) | planejado |
+| Série histórica de preços | [serie-historica-precos](estudos/serie-historica-precos/) | planejado |
+| Vendas de derivados | [vendas-derivados](estudos/vendas-derivados/) | planejado |
+| Fiscalização do abastecimento | [fiscalizacao-abastecimento](estudos/fiscalizacao-abastecimento/) | planejado |
+| Capacidade terminais | [capacidade-armazenagem-terminais](estudos/capacidade-armazenagem-terminais/) | planejado |
+| Movimentação terminais aquaviários | [movimentacao-terminais-aquaviarios](estudos/movimentacao-terminais-aquaviarios/) | planejado |
+| Registro lubrificantes | [registro-lubrificantes](estudos/registro-lubrificantes/) | planejado |
+| Processamento e derivados | [processamento-petroleo-derivados](estudos/processamento-petroleo-derivados/) | planejado |
+| Produção biocombustíveis | [producao-biocombustiveis](estudos/producao-biocombustiveis/) | planejado |
+| Produção por estado | [producao-por-estado](estudos/producao-por-estado/) | planejado |
+| Produção por poço | [producao-por-poco](estudos/producao-por-poco/) | planejado |
+| Importações e exportações | [importacoes-exportacoes](estudos/importacoes-exportacoes/) | planejado |
+| Anuário estatístico | [anuario-estatistico](estudos/anuario-estatistico/) | planejado |
 
 Configuração compartilhada entre estudos: [`config/monorepo.yaml`](config/monorepo.yaml).
 
