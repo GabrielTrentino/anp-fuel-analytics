@@ -16,7 +16,7 @@ Rastreio alinhado ao [TODO do atlas](https://github.com/GabrielTrentino/anp-data
 | `distribuidores-combustiveis-liquidos` | ✓ | ◐ | — |
 | `pmqc` | ✓ | ◐ | — |
 | `pml` | ✓ | ◐ | — |
-| `serie-historica-precos` | ✓ | ◐ | — |
+| `serie-historica-precos` | ✓ | ◐ | ◐ |
 | `vendas-derivados` | ✓ | ◐ | — |
 | `fiscalizacao-abastecimento` | ✓ | ◐ | — |
 | `capacidade-armazenagem-terminais` | ✓ | ◐ | — |

@@ -93,3 +93,20 @@ studies:
         engine: sql
         script: pipelines/sql/cadastro-revendas-combustiveis/trusted.sql
         output: data/trusted/cadastro-revendas-combustiveis/revendas.parquet
+  serie-historica-precos:
+    slug: serie-historica-precos
+    title: Série Histórica de Preços de Combustíveis
+    atlas_doc: docs/conjuntos/serie-historica-precos.md
+    notebooks: estudos/serie-historica-precos/notebooks
+    paths:
+      raw: data/raw/serie-historica-precos
+      trusted: data/trusted/serie-historica-precos
+      refined: data/refined/serie-historica-precos
+    pipeline:
+      - step: raw
+        engine: python
+        script: pipelines/python/download_serie_historica_precos.py
+      - step: trusted_qus_gasolina
+        engine: sql
+        script: pipelines/sql/serie-historica-precos/trusted_qus_gasolina.sql
+        output: data/trusted/serie-historica-precos/qus_gasolina_etanol.parquet
