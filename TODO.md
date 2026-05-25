@@ -9,7 +9,7 @@ Rastreio alinhado ao [TODO do atlas](https://github.com/GabrielTrentino/anp-data
 | Slug | Doc atlas | Estudo local | Pipeline |
 |------|-----------|--------------|----------|
 | `tancagem-abastecimento` | ✓ | ✓ | ◐ |
-| `movimentacao-derivados` | ✓ | ✓ | — |
+| `movimentacao-derivados` | ✓ | ✓ | ◐ |
 | `cadastro-revendas-combustiveis` | ✓ | ◐ | — |
 | `cadastro-revendas-glp` | ✓ | ◐ | — |
 | `pontos-abastecimento` | ✓ | ◐ | — |

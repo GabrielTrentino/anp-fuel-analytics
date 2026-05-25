@@ -26,14 +26,22 @@ def _sql_vars(slug: str, step: dict) -> dict[str, str]:
     def p(key: str) -> str:
         return str((REPO_ROOT / paths[key]).resolve()).replace("\\", "/")
 
+    trusted_parquet = step.get("output")
+    if trusted_parquet:
+        trusted_parquet = str((REPO_ROOT / trusted_parquet).resolve()).replace("\\", "/")
+    else:
+        trusted_parquet = f"{p('trusted')}/tancagem.parquet"
+
     vars_: dict[str, str] = {
         "RAW_DIR": p("raw"),
         "TRUSTED_DIR": p("trusted"),
-        "TRUSTED_PARQUET": f"{p('trusted')}/tancagem.parquet",
-        "TRUSTED_UF_DIR": p("trusted_uf"),
+        "TRUSTED_PARQUET": trusted_parquet,
         "REFINED_DIR": p("refined"),
-        "REFINED_PARQUET": f"{p('refined')}/tancagem_por_mes_uf_grupo_tag.parquet",
     }
+    if "trusted_uf" in paths:
+        vars_["TRUSTED_UF_DIR"] = p("trusted_uf")
+    if slug == "tancagem-abastecimento":
+        vars_["REFINED_PARQUET"] = f"{p('refined')}/tancagem_por_mes_uf_grupo_tag.parquet"
     for uf in study.get("trusted_uf_split", []):
         vars_[f"UF_{uf}"] = f"{p('trusted_uf')}/{uf}.parquet"
     return vars_
@@ -52,8 +60,11 @@ def run_step(slug: str, step: dict) -> None:
         sql_path = REPO_ROOT / step["script"]
         study = study_config(slug)
         paths = study["paths"]
-        for key in ("trusted", "trusted_uf", "refined"):
-            (REPO_ROOT / paths[key]).mkdir(parents=True, exist_ok=True)
+        for key in ("trusted", "refined"):
+            if key in paths:
+                (REPO_ROOT / paths[key]).mkdir(parents=True, exist_ok=True)
+        if "trusted_uf" in paths:
+            (REPO_ROOT / paths["trusted_uf"]).mkdir(parents=True, exist_ok=True)
         out = step.get("output")
         if out:
             out_path = REPO_ROOT / out

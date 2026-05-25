@@ -69,3 +69,10 @@ studies:
       - step: raw
         engine: python
         script: pipelines/python/download_movimentacao_derivados.py
+      - step: raw_prepare
+        engine: python
+        script: pipelines/python/prepare_movimentacao_raw.py
+      - step: trusted_liquidos
+        engine: sql
+        script: pipelines/sql/movimentacao-derivados/trusted_liquidos_vendas.sql
+        output: data/trusted/movimentacao-derivados/liquidos_vendas_atual.parquet

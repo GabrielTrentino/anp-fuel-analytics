@@ -8,8 +8,8 @@
 | Aqui (`anp-fuel-analytics`) | No atlas (`anp-data-atlas`) |
 |-----------------------------|-----------------------------|
 | Notebooks exploratórios (perfil, inventário, ligação com tancagem) | Documentação estável (sub-bases, schema, lacunas) |
-| Download raw (Python) | Matriz de ZIPs/CSVs e chaves de cruzamento |
-| Pipeline trusted/refined | **Pendente** — após validar unidades e join keys |
+| Download raw + prepare + trusted (MVP líquidos) | Matriz de ZIPs/CSVs e chaves de cruzamento |
+| Pipeline trusted/refined | MVP líquidos ✓ · demais produtos pendentes |
 
 ## Resumo do conjunto
 
@@ -21,43 +21,44 @@ Volumes movimentados no **SIMP** (Res. ANP 729/2018), publicados como **9 ZIPs p
 | Config | [`config/monorepo.yaml`](../../config/monorepo.yaml) — seção `studies.movimentacao-derivados` |
 | Metadados | `data/raw/movimentacao-derivados/metadado-unificado-logistica.pdf` |
 
-## Notebooks
-
-| Notebook | Objetivo |
-|----------|----------|
-| [01_perfil_exploratorio.ipynb](notebooks/01_perfil_exploratorio.ipynb) | Perfil raw, sub-bases por produto, inventário |
-
-## Download raw
+## Pipeline
 
 ```bash
-py estudos/movimentacao-derivados/pipelines/download_raw.py
-# ou
-py pipelines/run.py movimentacao-derivados raw
+py pipelines/run.py movimentacao-derivados              # raw + prepare + trusted_liquidos
+py pipelines/run.py movimentacao-derivados trusted_liquidos
 ```
 
-Extrai cada ZIP em `data/raw/movimentacao-derivados/{produto}/`.
+| Etapa | Script | Saída |
+|-------|--------|-------|
+| `raw` | `pipelines/python/download_movimentacao_derivados.py` | ZIPs extraídos em `data/raw/...` |
+| `raw_prepare` | `pipelines/python/prepare_movimentacao_raw.py` | histórico 2007–2017 normalizado |
+| `trusted_liquidos` | `pipelines/sql/movimentacao-derivados/trusted_liquidos_vendas.sql` | `liquidos_vendas_atual.parquet` |
 
-## Inventário empírico
+## Cruzamento com tancagem
+
+Resultado: [cruzamento_tancagem_resultado.md](cruzamento_tancagem_resultado.md)
 
 ```bash
-py estudos/movimentacao-derivados/export_inventario_raw.py
+py estudos/movimentacao-derivados/scripts/cruzamento_tancagem.py
 ```
 
-**47 CSVs** inventariados (extração 2026-05-24) — detalhes no atlas.
+- Match nome+UF: **30%** dos agentes movimentação
+- Match só nome: **57%** — join via razão social normalizada; CNPJ virá do cadastro revendas
 
-## Achados iniciais (exploração)
+## Achados importantes
 
-- **Sem `Cnpj`/`CodInstalacao`** na maioria das tabelas SIMP — agente por **razão social** ou **código regulado ANP** (sub-bases lubrificante).
-- **`Liquidos_Vendas_Historico_2007_a_2017.csv`** sem cabeçalho — tratar na ingestão.
-- **Logística** (`movimentacaologistica/`) — 3 CSVs agregados com `Período`, `UF`, `Produto`, `Operação` (desde 2022/01).
+- CSVs SIMP usam separador **`;`** (não vírgula)
+- Sem `Cnpj`/`CodInstalacao` — agente = `Agente Regulado`
+- Histórico 2007–2017 sem cabeçalho → `*_normalizado.csv`
 
-Ver **[TODO.md](TODO.md)** — join com tancagem, unidades, pipeline trusted.
+Ver **[TODO.md](TODO.md)**.
 
 ## Status
 
 | Item | Situação |
 |------|----------|
-| Download raw | `pipelines/python/download_movimentacao_derivados.py` ✓ |
-| Inventário empírico | `export_inventario_raw.py` ✓ |
-| Notebook exploratório | `notebooks/01_perfil_exploratorio.ipynb` ✓ |
-| Camada trusted/refined | pendente |
+| Download raw | ✓ |
+| Prepare (histórico) | ✓ |
+| Trusted líquidos vendas atual | ✓ |
+| Cruzamento tancagem | ✓ |
+| Demais produtos / refined | pendente |
