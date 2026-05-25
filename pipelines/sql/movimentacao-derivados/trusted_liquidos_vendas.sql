@@ -15,6 +15,11 @@ WITH raw AS (
 ),
 norm AS (
     SELECT
+        make_date(
+            try_cast("Ano" AS INTEGER),
+            try_cast("Mês" AS INTEGER),
+            1
+        ) AS data_referencia,
         try_cast("Ano" AS INTEGER) AS ano,
         try_cast("Mês" AS INTEGER) AS mes,
         "Agente Regulado" AS agente_regulado,
