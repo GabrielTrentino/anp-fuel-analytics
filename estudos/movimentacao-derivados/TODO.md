@@ -10,9 +10,9 @@
 | Join via código ANP do regulado | Mapear `Código do Regulado - ANP` (lubrificante Anexo B) com cadastro i-SIMP |
 | Join geo | `UF Origem`/`UF Destino` + `Produto` + `Ano`/`Mês` — agregado, não instalação |
 
-- [ ] Cruzar amostra `Liquidos_Vendas_Atual` com `tancagem.parquet` por nome + UF
+- [x] Cruzar amostra `Liquidos_Vendas_Atual` com `tancagem.parquet` por nome + UF — ver [cruzamento_tancagem_resultado.md](cruzamento_tancagem_resultado.md)
 - [ ] Verificar se cadastro revendas traz código ANP além de CNPJ
-- [ ] Documentar conclusão no atlas (`movimentacao-derivados.md`)
+- [x] Documentar conclusão no atlas (`movimentacao-derivados.md`)
 
 ---
 
@@ -20,8 +20,8 @@
 
 `liquidos/Liquidos_Vendas_Historico_2007_a_2017.csv` — **710.831 linhas sem linha de cabeçalho** (primeira linha já é dado).
 
-- [ ] Confirmar layout oficial no PDF `metadado-unificado-logistica.pdf`
-- [ ] Definir schema fixo na ingestão (Ano, Mês, Agente, Código Produto, …)
+- [x] Confirmar layout oficial no PDF `metadado-unificado-logistica.pdf` — 11 campos `;`, sem linha de cabeçalho
+- [x] Definir schema fixo na ingestão — `prepare_movimentacao_raw.py` → `*_normalizado.csv`
 - [ ] Validar totais contra `Liquidos_Vendas_Atual` no overlap 2017
 
 ---
@@ -36,15 +36,15 @@
 | Logística | `Qtd Produto Líquido` | **validar** (valores brutos altos — possível litros) |
 
 - [ ] Ler metadados PDF e harmonizar unidade na camada trusted
-- [ ] Não somar lubrificante (L) com líquidos (mil m³) sem conversão
+- [x] Não somar lubrificante (L) com líquidos (mil m³) sem conversão — famílias separadas no portal
 
 ---
 
 ## Pipeline trusted/refined
 
-- [ ] `prepare_movimentacao_raw.py` — empilhar por produto/tipo de tabela
-- [ ] `trusted.sql` — schema unificado mínimo: `periodo`, `produto`, `agente`, `uf_origem`, `uf_destino`, `volume_m3`, `_source_file`
-- [ ] Entrada em `pipelines/run.py` / `monorepo.yaml` (steps trusted+)
+- [x] `prepare_movimentacao_raw.py` — histórico 2007–2017 normalizado
+- [x] `trusted_liquidos_vendas.sql` — MVP `liquidos_vendas_atual.parquet`
+- [ ] Demais produtos / tabelas no trusted unificado
 
 ---
 
