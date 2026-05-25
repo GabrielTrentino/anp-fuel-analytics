@@ -76,3 +76,20 @@ studies:
         engine: sql
         script: pipelines/sql/movimentacao-derivados/trusted_liquidos_vendas.sql
         output: data/trusted/movimentacao-derivados/liquidos_vendas_atual.parquet
+  cadastro-revendas-combustiveis:
+    slug: cadastro-revendas-combustiveis
+    title: Dados Cadastrais dos Revendedores Varejistas de Combustíveis Automotivos
+    atlas_doc: docs/conjuntos/cadastro-revendas-combustiveis.md
+    notebooks: estudos/cadastro-revendas-combustiveis/notebooks
+    paths:
+      raw: data/raw/cadastro-revendas-combustiveis
+      trusted: data/trusted/cadastro-revendas-combustiveis
+      refined: data/refined/cadastro-revendas-combustiveis
+    pipeline:
+      - step: raw
+        engine: python
+        script: pipelines/python/download_cadastro_revendas_combustiveis.py
+      - step: trusted
+        engine: sql
+        script: pipelines/sql/cadastro-revendas-combustiveis/trusted.sql
+        output: data/trusted/cadastro-revendas-combustiveis/revendas.parquet

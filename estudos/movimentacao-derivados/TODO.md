@@ -12,11 +12,11 @@ Rastreio técnico e fila de análises. Sugestões temáticas completas: [atlas �
 |----------|--------|
 | Join tancagem via nome + UF | ✓ 30,4% match — [cruzamento_tancagem_resultado.md](cruzamento_tancagem_resultado.md) |
 | Join via código ANP (lubrificante) | pendente |
-| Join via cadastro revendas (CNPJ) | **próximo conjunto** |
+| Join via cadastro revendas (CNPJ) | ✓ (ver [cadastro](../cadastro-revendas-combustiveis/cruzamento_resultado.md)) |
 
 - [x] Cruzar `Liquidos_Vendas_Atual` × `tancagem.parquet`
 - [ ] Fuzzy match nome (Levenshtein / alias) — subir taxa além de 57% só-nome
-- [ ] Verificar cadastro revendas: `Cnpj` + razão social + código instalação
+- [x] Verificar cadastro revendas: `Cnpj` + razão social + código instalação — 46k postos; join agente mov ~0,5%
 - [x] Documentar no atlas
 
 ---
@@ -78,7 +78,7 @@ Fila priorizada (espelha [Sugestões de análises](https://github.com/GabrielTre
 - [ ] Top 20 `agente_regulado` por volume (últimos 12 meses)
 - [ ] HHI ou share top 5 por produto (gasolina C, diesel S10, etanol)
 - [ ] Agentes presentes em movimentação mas **sem** match tancagem (lista dos 488 nome+UF)
-- [ ] Após cadastro revendas: join CNPJ e recalcular match tancagem
+- [x] Após cadastro revendas: join CNPJ — intersecao tancagem 0% (universos distintos); ver cruzamento cadastro
 
 ### 4. Capacidade vs movimentação (com tancagem)
 
