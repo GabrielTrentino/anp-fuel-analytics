@@ -51,7 +51,20 @@ py estudos/movimentacao-derivados/scripts/cruzamento_tancagem.py
 - Sem `Cnpj`/`CodInstalacao` — agente = `Agente Regulado`
 - Histórico 2007–2017 sem cabeçalho → `*_normalizado.csv`
 
-Ver **[TODO.md](TODO.md)**.
+Ver **[TODO.md](TODO.md)** — fila de análises priorizadas (padrão tancagem).
+
+## Próximas análises (resumo)
+
+| Prioridade | Tema | Onde |
+|:----------:|------|------|
+| 1 | Série temporal líquidos 2017–2026, overlap histórico | `liquidos_vendas_atual.parquet` |
+| 2 | Top agentes, concentração, match tancagem expandido | trusted + cadastro (futuro) |
+| 3 | Capacidade vs volume (213 matches nome+UF) | × `tancagem.parquet` |
+| 4 | Matriz UF origem × destino, mercado destinatário | trusted líquidos |
+| 5 | GLP, TRR, lubrificante, logística | raw 47 CSVs |
+| 6 | × vendas-derivados, preços LPC | outros conjuntos |
+
+Detalhe com checkboxes: **[TODO.md#próximas-análises](TODO.md#próximas-análises)** · catálogo completo no **[atlas](https://github.com/GabrielTrentino/anp-data-atlas/blob/main/docs/conjuntos/movimentacao-derivados.md#sugestões-de-análises)**.
 
 ## Status
 
