@@ -16,6 +16,10 @@
 | Cruzamento cadastro (CNPJ) | ✓ |
 | Notebook `01_perfil_exploratorio.ipynb` | — |
 
+## Famílias no portal (`shpc/`)
+
+Glossário **qus / dsan / dsas**: [atlas — estrutura shpc](https://github.com/GabrielTrentino/anp-data-atlas/blob/main/docs/conjuntos/serie-historica-precos.md#estrutura-do-portal-shpc).
+
 ## Download
 
 ```bash

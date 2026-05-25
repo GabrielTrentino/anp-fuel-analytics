@@ -7,6 +7,8 @@
 
 Série **LPC** em nível de **posto** (`CNPJ da Revenda`), cruzamento principal com [cadastro revendas](../cadastro-revendas-combustiveis/).
 
+**Pastas raw (`shpc/`):** `qus` (4 semanas) · `dsan/ano` (mensal) · `dsas` (semestral) — glossário completo no [atlas](https://github.com/GabrielTrentino/anp-data-atlas/blob/main/docs/conjuntos/serie-historica-precos.md#estrutura-do-portal-shpc).
+
 ## Pipeline
 
 ```bash
