@@ -110,3 +110,11 @@ studies:
         engine: sql
         script: pipelines/sql/serie-historica-precos/trusted_qus_gasolina.sql
         output: data/trusted/serie-historica-precos/qus_gasolina_etanol.parquet
+      - step: trusted_dsan_gasolina
+        engine: sql
+        script: pipelines/sql/serie-historica-precos/trusted_dsan_gasolina_etanol.sql
+        output: data/trusted/serie-historica-precos/dsan_gasolina_etanol_2024_2025.parquet
+      - step: trusted_lpc_posto
+        engine: sql
+        script: pipelines/sql/serie-historica-precos/trusted_lpc_posto.sql
+        output: data/trusted/serie-historica-precos/lpc_posto.parquet

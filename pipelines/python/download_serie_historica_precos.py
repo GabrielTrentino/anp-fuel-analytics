@@ -1,6 +1,7 @@
-"""Download MVP da serie historica de precos (LPC) — amostra para exploracao."""
+"""Download serie historica de precos (LPC) — MVP + dsan mensal."""
 from __future__ import annotations
 
+import argparse
 import sys
 import urllib.request
 import zipfile
@@ -16,16 +17,38 @@ SLUG = "serie-historica-precos"
 BASE = "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/shpc"
 USER_AGENT = "Mozilla/5.0 (anp-fuel-analytics; research)"
 
-# (subdir local, path no portal)
-FILES: list[tuple[str, str]] = [
+DSAN_FAMILIES = (
+    "precos-gasolina-etanol",
+    "precos-diesel-gnv",
+    "precos-glp",
+)
+
+STATIC: list[tuple[str, str]] = [
     ("", "metadados-serie-historica-precos-combustiveis-1.pdf"),
     ("qus", "qus/ultimas-4-semanas-gasolina-etanol.csv"),
     ("qus", "qus/ultimas-4-semanas-diesel-gnv.csv"),
     ("qus", "qus/ultimas-4-semanas-glp.csv"),
-    ("dsas/ca", "dsas/ca/ca-2024-01.csv"),
     ("dsas/ca", "dsas/ca/ca-2025-02.zip"),
-    ("dsan/2025", "dsan/2025/precos-gasolina-etanol-12.csv"),
 ]
+
+
+def dsan_files(years: list[int], months: range | None = None) -> list[tuple[str, str]]:
+    """Gera paths dsan/YYYY/precos-*-MM.csv."""
+    months = months or range(1, 13)
+    out: list[tuple[str, str]] = []
+    for year in years:
+        for fam in DSAN_FAMILIES:
+            for m in months:
+                rel = f"dsan/{year}/{fam}-{m:02d}.csv"
+                out.append((f"dsan/{year}", rel))
+    return out
+
+
+def all_files(years: list[int] | None) -> list[tuple[str, str]]:
+    files = list(STATIC)
+    if years:
+        files.extend(dsan_files(years))
+    return files
 
 
 def download(url: str, dest: Path) -> None:
@@ -36,21 +59,29 @@ def download(url: str, dest: Path) -> None:
     if dest.suffix.lower() == ".zip":
         with zipfile.ZipFile(BytesIO(data)) as zf:
             zf.extractall(dest.parent)
-        dest.write_bytes(data)  # keep zip too
+        dest.write_bytes(data)
     else:
         dest.write_bytes(data)
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description="Download LPC (serie historica precos)")
+    parser.add_argument(
+        "--years",
+        default="",
+        help="Anos dsan separados por virgula (ex.: 2024,2025). Vazio = so arquivos estaticos/MVP.",
+    )
+    args = parser.parse_args()
+    years = [int(y.strip()) for y in args.years.split(",") if y.strip()] if args.years else None
+
     root = study_paths(SLUG)["raw"]
-    ok, fail = 0, 0
-    for sub, rel in FILES:
+    ok, fail, skip = 0, 0, 0
+    for sub, rel in all_files(years):
         url = f"{BASE}/{rel}"
         name = Path(rel).name
         dest = root / sub / name if sub else root / name
         if dest.exists() and dest.stat().st_size > 0:
-            print(f"skip {dest.relative_to(REPO_ROOT)}")
-            ok += 1
+            skip += 1
             continue
         try:
             print(f"get  {dest.relative_to(REPO_ROOT)}")
@@ -59,7 +90,10 @@ def main() -> None:
         except Exception as e:
             print(f"FAIL {rel}: {e}")
             fail += 1
-    print(f"\n{ok} arquivos ok, {fail} falhas -> {root.relative_to(REPO_ROOT)}")
+    print(
+        f"\n{ok} baixados, {skip} skip, {fail} falhas -> {root.relative_to(REPO_ROOT)}"
+        + (f" (dsan anos: {years})" if years else " (MVP)")
+    )
 
 
 if __name__ == "__main__":

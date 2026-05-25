@@ -6,28 +6,29 @@
 
 | Item | Status |
 |------|--------|
-| Download raw MVP (qus + dsan + semestral) | ◐ |
+| Download raw MVP (qus + metadados) | ✓ |
+| Download dsan 2024–2025 (71 CSVs) | ✓ |
 | `config/monorepo.yaml` | ✓ |
 | Trusted `qus_gasolina_etanol.parquet` | ✓ |
-| Trusted dsan mensal / semestral CA completo | — |
+| Trusted `dsan_gasolina_etanol_2024_2025.parquet` | ✓ |
+| Trusted `lpc_posto.parquet` (qus + dsan gasolina) | ✓ |
+| Trusted diesel/glp dsan consolidado | — |
 | Cruzamento cadastro (CNPJ) | ✓ |
 | Notebook `01_perfil_exploratorio.ipynb` | — |
 
-## Familias de arquivo (portal)
+## Download
 
-| Pasta | Conteudo | Granularidade |
-|-------|----------|---------------|
-| `qus/` | Ultimas 4 semanas | Posto (CNPJ) x produto x coleta |
-| `dsan/YYYY/` | Mensal por produto | Posto (CNPJ) |
-| `dsas/ca/` | Semestral combustiveis automotivos | Posto (CNPJ) |
-| `dsas/glp/` | Semestral GLP | Posto (CNPJ) |
+```bash
+py pipelines/python/download_serie_historica_precos.py              # MVP
+py pipelines/python/download_serie_historica_precos.py --years 2024,2025
+```
 
 ## Próximas análises
 
 | Prioridade | Tema |
 |:----------:|------|
-| 1 | Expandir download dsan 2024–2025 (12 meses x 3 familias) |
-| 2 | Série temporal por produto/UF (gasolina C, etanol, diesel) |
-| 3 | Spread compra/venda por bandeira |
-| 4 | × cadastro: postos com preço mas fora do cadastro (e vice-versa) |
+| 1 | Série média venda por produto/UF (dsan 2024–2025) |
+| 2 | Spread compra/venda × bandeira |
+| 3 | Postos no cadastro sem preço LPC no período |
+| 4 | Trusted diesel + GLP (mesmo schema) |
 | 5 | × vendas-derivados agregado UF |
