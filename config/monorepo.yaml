@@ -193,3 +193,20 @@ studies:
         engine: sql
         script: pipelines/sql/distribuidores-combustiveis-liquidos/trusted.sql
         output: data/trusted/distribuidores-combustiveis-liquidos/distribuidores.parquet
+  pml:
+    slug: pml
+    title: Programa de Monitoramento dos Lubrificantes
+    atlas_doc: docs/conjuntos/pml.md
+    notebooks: estudos/pml/notebooks
+    paths:
+      raw: data/raw/pml
+      trusted: data/trusted/pml
+      refined: data/refined/pml
+    pipeline:
+      - step: raw
+        engine: python
+        script: pipelines/python/download_pml.py
+      - step: trusted
+        engine: sql
+        script: pipelines/sql/pml/trusted.sql
+        output: data/trusted/pml/pml.parquet
