@@ -14,7 +14,7 @@
 | Trusted `lpc_posto.parquet` (qus + dsan gasolina) | ✓ |
 | Trusted dsan diesel/GNV (`dsan_diesel_gnv_2024_2025.parquet` — 536.534 linhas, 10.532 CNPJs) | ✓ |
 | Cruzamento cadastro (CNPJ) | ✓ |
-| Notebook `01_perfil_exploratorio.ipynb` | — |
+| Notebook `01_perfil_exploratorio.ipynb` (10 seções: evolução, spread, UF, diesel gap, bandeira, volatilidade, GNV, paridade etanol, dispersão municipal, resumo) | ✓ |
 
 ## Famílias no portal (`shpc/`)
 
