@@ -11,7 +11,7 @@ Rastreio alinhado ao [TODO do atlas](https://github.com/GabrielTrentino/anp-data
 | `tancagem-abastecimento` | ✓ | ✓ | ◐ |
 | `movimentacao-derivados` | ✓ | ✓ | ◐ |
 | `cadastro-revendas-combustiveis` | ✓ | ✓ | ◐ |
-| `cadastro-revendas-glp` | ✓ | ◐ | — |
+| `cadastro-revendas-glp` | ✓ | ✓ | ◐ |
 | `pontos-abastecimento` | ✓ | ◐ | — |
 | `distribuidores-combustiveis-liquidos` | ✓ | ◐ | — |
 | `pmqc` | ✓ | ✓ | ◐ |
