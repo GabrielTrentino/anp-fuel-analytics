@@ -280,3 +280,83 @@ studies:
         engine: sql
         script: pipelines/sql/registro-lubrificantes/trusted.sql
         output: data/trusted/registro-lubrificantes/registro_lubrificantes.parquet
+  processamento-petroleo-derivados:
+    slug: processamento-petroleo-derivados
+    title: Processamento de Petróleo e Produção de Derivados
+    atlas_doc: docs/conjuntos/processamento-petroleo-derivados.md
+    paths:
+      raw: data/raw/processamento-petroleo-derivados
+      trusted: data/trusted/processamento-petroleo-derivados
+      refined: data/refined/processamento-petroleo-derivados
+    pipeline:
+      - step: raw
+        engine: python
+        script: pipelines/python/download_processamento_petroleo_derivados.py
+      - step: trusted
+        engine: sql
+        script: pipelines/sql/processamento-petroleo-derivados/trusted.sql
+        output: data/trusted/processamento-petroleo-derivados/processamento.parquet
+  producao-biocombustiveis:
+    slug: producao-biocombustiveis
+    title: Produção de Biocombustíveis
+    atlas_doc: docs/conjuntos/producao-biocombustiveis.md
+    paths:
+      raw: data/raw/producao-biocombustiveis
+      trusted: data/trusted/producao-biocombustiveis
+      refined: data/refined/producao-biocombustiveis
+    pipeline:
+      - step: raw
+        engine: python
+        script: pipelines/python/download_producao_biocombustiveis.py
+      - step: trusted
+        engine: sql
+        script: pipelines/sql/producao-biocombustiveis/trusted.sql
+        output: data/trusted/producao-biocombustiveis/producao_biocombustiveis.parquet
+  producao-por-estado:
+    slug: producao-por-estado
+    title: Produção de Petróleo e GN por Estado
+    atlas_doc: docs/conjuntos/producao-por-estado.md
+    paths:
+      raw: data/raw/producao-por-estado
+      trusted: data/trusted/producao-por-estado
+      refined: data/refined/producao-por-estado
+    pipeline:
+      - step: raw
+        engine: python
+        script: pipelines/python/download_producao_por_estado.py
+      - step: trusted
+        engine: sql
+        script: pipelines/sql/producao-por-estado/trusted.sql
+        output: data/trusted/producao-por-estado/producao_estado.parquet
+  producao-por-poco:
+    slug: producao-por-poco
+    title: Produção de Petróleo e GN por Poço
+    atlas_doc: docs/conjuntos/producao-por-poco.md
+    paths:
+      raw: data/raw/producao-por-poco
+      trusted: data/trusted/producao-por-poco
+      refined: data/refined/producao-por-poco
+    pipeline:
+      - step: raw
+        engine: python
+        script: pipelines/python/download_producao_por_poco.py
+      - step: trusted
+        engine: sql
+        script: pipelines/sql/producao-por-poco/trusted.sql
+        output: data/trusted/producao-por-poco/producao_poco.parquet
+  importacoes-exportacoes:
+    slug: importacoes-exportacoes
+    title: Importações e Exportações
+    atlas_doc: docs/conjuntos/importacoes-exportacoes.md
+    paths:
+      raw: data/raw/importacoes-exportacoes
+      trusted: data/trusted/importacoes-exportacoes
+      refined: data/refined/importacoes-exportacoes
+    pipeline:
+      - step: raw
+        engine: python
+        script: pipelines/python/download_importacoes_exportacoes.py
+      - step: trusted
+        engine: sql
+        script: pipelines/sql/importacoes-exportacoes/trusted.sql
+        output: data/trusted/importacoes-exportacoes/importacoes_exportacoes.parquet
