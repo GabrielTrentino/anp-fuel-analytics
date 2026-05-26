@@ -93,6 +93,10 @@ studies:
         engine: sql
         script: pipelines/sql/cadastro-revendas-combustiveis/trusted.sql
         output: data/trusted/cadastro-revendas-combustiveis/revendas.parquet
+      - step: refined
+        engine: sql
+        script: pipelines/sql/cadastro-revendas-combustiveis/refined_preco_bandeira.sql
+        output: data/refined/cadastro-revendas-combustiveis/preco_por_bandeira_uf.parquet
   serie-historica-precos:
     slug: serie-historica-precos
     title: Série Histórica de Preços de Combustíveis
@@ -118,6 +122,10 @@ studies:
         engine: sql
         script: pipelines/sql/serie-historica-precos/trusted_lpc_posto.sql
         output: data/trusted/serie-historica-precos/lpc_posto.parquet
+      - step: trusted_dsan_diesel_gnv
+        engine: sql
+        script: pipelines/sql/serie-historica-precos/trusted_dsan_diesel_gnv.sql
+        output: data/trusted/serie-historica-precos/dsan_diesel_gnv_2024_2025.parquet
   vendas-derivados:
     slug: vendas-derivados
     title: Vendas de derivados de petróleo e biocombustíveis
@@ -142,6 +150,22 @@ studies:
         engine: sql
         script: pipelines/sql/vendas-derivados/trusted_segmento.sql
         output: data/trusted/vendas-derivados/vendas_segmento.parquet
+      - step: trusted_diesel_tipo
+        engine: sql
+        script: pipelines/sql/vendas-derivados/trusted_diesel_tipo.sql
+        output: data/trusted/vendas-derivados/vendas_diesel_tipo.parquet
+      - step: trusted_glp_vasilhame
+        engine: sql
+        script: pipelines/sql/vendas-derivados/trusted_glp_vasilhame.sql
+        output: data/trusted/vendas-derivados/vendas_glp_vasilhame.parquet
+      - step: trusted_biodiesel
+        engine: sql
+        script: pipelines/sql/vendas-derivados/trusted_biodiesel.sql
+        output: data/trusted/vendas-derivados/vendas_biodiesel.parquet
+      - step: trusted_municipal
+        engine: sql
+        script: pipelines/sql/vendas-derivados/trusted_municipal.sql
+        output: data/trusted/vendas-derivados/vendas_municipal.parquet
   pmqc:
     slug: pmqc
     title: Programa de Monitoramento da Qualidade dos Combustíveis

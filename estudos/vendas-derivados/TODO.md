@@ -12,10 +12,10 @@
 
 ## Pendente
 
-- [ ] Trusted diesel por tipo
-- [ ] Trusted GLP por vasilhame
-- [ ] Trusted biodiesel B100
-- [ ] Trusted municipal (gasolina, diesel, etanol, GLP)
-- [ ] Notebook `01_perfil_exploratorio.ipynb` (evolução temporal, sazonalidade)
+- [x] Trusted diesel por tipo (`vendas_diesel_tipo.parquet` — 21.465 linhas, 2013–2025)
+- [x] Trusted GLP por vasilhame (`vendas_glp_vasilhame.parquet` — 12.474 linhas, 2007–2025)
+- [x] Trusted biodiesel B100 (`vendas_biodiesel.parquet` — 1.852 linhas, origem×destino regional)
+- [x] Trusted municipal (`vendas_municipal.parquet` — 666.699 linhas, 4 produtos, 1990–2024)
+- [x] Notebook `01_perfil_exploratorio.ipynb` (9 seções: evolução, top 5, sazonalidade, diesel tipo, GLP, biodiesel, municipal, UF, segmento)
 - [ ] Refined: join vendas × movimentação (comparar volumes SDC vs SIMP por UF/mês)
 - [ ] Refined: join vendas × preços médios (receita estimada m³ × R$/L)

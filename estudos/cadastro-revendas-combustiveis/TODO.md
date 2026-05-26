@@ -8,9 +8,9 @@
 |------|--------|
 | Download raw (portal) | ✓ |
 | `config/monorepo.yaml` | ✓ |
-| Trusted `revendas.parquet` | ✓ |
-| Refined / agregações | — |
-| Notebook `01_perfil_exploratorio.ipynb` | — |
+| Trusted `revendas.parquet` (46.095 postos) | ✓ |
+| Refined `preco_por_bandeira_uf.parquet` (26.364 linhas, 51 bandeiras, 1,6M coletas) | ✓ |
+| Notebook `01_perfil_exploratorio.ipynb` (6 seções: UF, bandeiras, série, branca%, preços, municípios) | ✓ |
 
 ## Cruzamentos
 

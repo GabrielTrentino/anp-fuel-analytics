@@ -12,7 +12,7 @@
 | Trusted `qus_gasolina_etanol.parquet` | ✓ |
 | Trusted `dsan_gasolina_etanol_2024_2025.parquet` | ✓ |
 | Trusted `lpc_posto.parquet` (qus + dsan gasolina) | ✓ |
-| Trusted diesel/glp dsan consolidado | — |
+| Trusted dsan diesel/GNV (`dsan_diesel_gnv_2024_2025.parquet` — 536.534 linhas, 10.532 CNPJs) | ✓ |
 | Cruzamento cadastro (CNPJ) | ✓ |
 | Notebook `01_perfil_exploratorio.ipynb` | — |
 
