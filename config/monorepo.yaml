@@ -155,10 +155,21 @@ studies:
       - step: raw
         engine: python
         script: pipelines/python/download_pmqc.py
+      - step: raw_prepare
+        engine: python
+        script: pipelines/python/prepare_pmqc_raw.py
       - step: trusted
         engine: sql
         script: pipelines/sql/pmqc/trusted.sql
         output: data/trusted/pmqc/pmqc.parquet
+      - step: refined
+        engine: sql
+        script: pipelines/sql/pmqc/refined_nao_conformidade.sql
+        output: data/refined/pmqc/nao_conformidade_uf_produto.parquet
+      - step: refined
+        engine: sql
+        script: pipelines/sql/pmqc/refined_pmqc_precos.sql
+        output: data/refined/pmqc/pmqc_precos_join.parquet
   cadastro-revendas-glp:
     slug: cadastro-revendas-glp
     title: Dados Cadastrais das Revendas de GLP

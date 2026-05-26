@@ -9,12 +9,17 @@
 - [x] Config `monorepo.yaml`
 - [x] Cruzamento preços LPC (29,3% overlap) e não-conformidades
 - [x] Documentação README + TODO
+- [x] Download anos anteriores (2016–2023) via `--years` — 100 arquivos, 0 falhas
+- [x] Rebuild trusted (8.424.805 ensaios, 48.249 CNPJs, 2016-01 a 2026-04)
+- [x] Notebook `01_perfil_exploratorio.ipynb` (8 seções: evolução, NC por UF/produto, cruzamento cadastro)
+- [x] Refined: série temporal taxa não-conformidade por UF/produto (`nao_conformidade_uf_produto.parquet`)
+- [x] Refined: join PMQC × preços (`pmqc_precos_join.parquet` + `resumo_preco_conformidade.parquet`)
+- [x] Análise: postos PMQC que NÃO constam no cadastro (11.407 = 23,6% dos CNPJs)
 
-## Pendente
+## Resultados-chave
 
-- [ ] Download anos anteriores (2016–2023) via `--years`
-- [ ] Trusted cadastro-revendas para cruzamento CNPJ completo
-- [ ] Notebook `01_perfil_exploratorio.ipynb` (distribuição geográfica, sazonalidade não-conformidade)
-- [ ] Refined: join PMQC × preços (postos não-conformes praticam preço diferente?)
-- [ ] Refined: série temporal taxa não-conformidade por UF/produto
-- [ ] Análise: postos amostrados no PMQC que NÃO constam no cadastro
+- **8,4M ensaios** — série 2016-01 a 2026-04
+- **Taxa NC média:** 0,017% por UF/mês/produto (muito baixa por ensaio)
+- **Overlap PMQC × Cadastro:** 76,4% (36.842 CNPJs)
+- **Postos fora do cadastro:** 11.407 — concentrados em SP, MG, RS
+- **PMQC × Preços (LPC):** 4.459 CNPJs em comum; postos NC → preço ligeiramente menor
