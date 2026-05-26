@@ -18,10 +18,10 @@ Rastreio alinhado ao [TODO do atlas](https://github.com/GabrielTrentino/anp-data
 | `pml` | ✓ | ✓ | ◐ |
 | `serie-historica-precos` | ✓ | ✓ | ◐ |
 | `vendas-derivados` | ✓ | ✓ | ◐ |
-| `fiscalizacao-abastecimento` | ✓ | ◐ | — |
-| `capacidade-armazenagem-terminais` | ✓ | ◐ | — |
-| `movimentacao-terminais-aquaviarios` | ✓ | ◐ | — |
-| `registro-lubrificantes` | ✓ | ◐ | — |
+| `fiscalizacao-abastecimento` | ✓ | ✓ | ◐ |
+| `capacidade-armazenagem-terminais` | ✓ | ✓ | ◐ |
+| `movimentacao-terminais-aquaviarios` | ✓ | ✓ | ◐ |
+| `registro-lubrificantes` | ✓ | ✓ | ◐ |
 
 ## Contexto oferta / macro
 
