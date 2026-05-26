@@ -159,3 +159,20 @@ studies:
         engine: sql
         script: pipelines/sql/pmqc/trusted.sql
         output: data/trusted/pmqc/pmqc.parquet
+  cadastro-revendas-glp:
+    slug: cadastro-revendas-glp
+    title: Dados Cadastrais das Revendas de GLP
+    atlas_doc: docs/conjuntos/cadastro-revendas-glp.md
+    notebooks: estudos/cadastro-revendas-glp/notebooks
+    paths:
+      raw: data/raw/cadastro-revendas-glp
+      trusted: data/trusted/cadastro-revendas-glp
+      refined: data/refined/cadastro-revendas-glp
+    pipeline:
+      - step: raw
+        engine: python
+        script: pipelines/python/download_cadastro_revendas_glp.py
+      - step: trusted
+        engine: sql
+        script: pipelines/sql/cadastro-revendas-glp/trusted.sql
+        output: data/trusted/cadastro-revendas-glp/cadastro_revendas_glp.parquet
