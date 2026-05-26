@@ -217,13 +217,18 @@ studies:
     paths:
       raw: data/raw/fiscalizacao-abastecimento
       trusted: data/trusted/fiscalizacao-abastecimento
+      refined: data/refined/fiscalizacao-abastecimento
     pipeline:
       - step: raw
         engine: python
         script: pipelines/python/download_fiscalizacao_abastecimento.py
-      - step: trusted
+      - step: raw_prepare
         engine: python
         script: pipelines/python/prepare_fiscalizacao_abastecimento.py
+      - step: trusted
+        engine: sql
+        script: pipelines/sql/fiscalizacao-abastecimento/trusted.sql
+        output: data/trusted/fiscalizacao-abastecimento/fiscalizacao.parquet
   capacidade-armazenagem-terminais:
     slug: capacidade-armazenagem-terminais
     title: Capacidade de Armazenagem de Terminais
@@ -231,6 +236,7 @@ studies:
     paths:
       raw: data/raw/capacidade-armazenagem-terminais
       trusted: data/trusted/capacidade-armazenagem-terminais
+      refined: data/refined/capacidade-armazenagem-terminais
     pipeline:
       - step: raw
         engine: python
@@ -246,10 +252,14 @@ studies:
     paths:
       raw: data/raw/movimentacao-terminais-aquaviarios
       trusted: data/trusted/movimentacao-terminais-aquaviarios
+      refined: data/refined/movimentacao-terminais-aquaviarios
     pipeline:
       - step: raw
         engine: python
         script: pipelines/python/download_movimentacao_terminais_aquaviarios.py
+      - step: raw_prepare
+        engine: python
+        script: pipelines/python/prepare_movimentacao_terminais.py
       - step: trusted
         engine: sql
         script: pipelines/sql/movimentacao-terminais-aquaviarios/trusted.sql
@@ -261,6 +271,7 @@ studies:
     paths:
       raw: data/raw/registro-lubrificantes
       trusted: data/trusted/registro-lubrificantes
+      refined: data/refined/registro-lubrificantes
     pipeline:
       - step: raw
         engine: python
