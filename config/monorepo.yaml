@@ -118,3 +118,27 @@ studies:
         engine: sql
         script: pipelines/sql/serie-historica-precos/trusted_lpc_posto.sql
         output: data/trusted/serie-historica-precos/lpc_posto.parquet
+  vendas-derivados:
+    slug: vendas-derivados
+    title: Vendas de derivados de petróleo e biocombustíveis
+    atlas_doc: docs/conjuntos/vendas-derivados.md
+    notebooks: estudos/vendas-derivados/notebooks
+    paths:
+      raw: data/raw/vendas-derivados
+      trusted: data/trusted/vendas-derivados
+      refined: data/refined/vendas-derivados
+    pipeline:
+      - step: raw
+        engine: python
+        script: pipelines/python/download_vendas_derivados.py
+      - step: raw_prepare
+        engine: python
+        script: pipelines/python/prepare_vendas_derivados_raw.py
+      - step: trusted_mensal
+        engine: sql
+        script: pipelines/sql/vendas-derivados/trusted_mensal.sql
+        output: data/trusted/vendas-derivados/vendas_mensal.parquet
+      - step: trusted_segmento
+        engine: sql
+        script: pipelines/sql/vendas-derivados/trusted_segmento.sql
+        output: data/trusted/vendas-derivados/vendas_segmento.parquet

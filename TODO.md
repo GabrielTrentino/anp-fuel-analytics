@@ -17,7 +17,7 @@ Rastreio alinhado ao [TODO do atlas](https://github.com/GabrielTrentino/anp-data
 | `pmqc` | ✓ | ◐ | — |
 | `pml` | ✓ | ◐ | — |
 | `serie-historica-precos` | ✓ | ✓ | ◐ |
-| `vendas-derivados` | ✓ | ◐ | — |
+| `vendas-derivados` | ✓ | ✓ | ◐ |
 | `fiscalizacao-abastecimento` | ✓ | ◐ | — |
 | `capacidade-armazenagem-terminais` | ✓ | ◐ | — |
 | `movimentacao-terminais-aquaviarios` | ✓ | ◐ | — |
