@@ -142,3 +142,20 @@ studies:
         engine: sql
         script: pipelines/sql/vendas-derivados/trusted_segmento.sql
         output: data/trusted/vendas-derivados/vendas_segmento.parquet
+  pmqc:
+    slug: pmqc
+    title: Programa de Monitoramento da Qualidade dos Combustíveis
+    atlas_doc: docs/conjuntos/pmqc.md
+    notebooks: estudos/pmqc/notebooks
+    paths:
+      raw: data/raw/pmqc
+      trusted: data/trusted/pmqc
+      refined: data/refined/pmqc
+    pipeline:
+      - step: raw
+        engine: python
+        script: pipelines/python/download_pmqc.py
+      - step: trusted
+        engine: sql
+        script: pipelines/sql/pmqc/trusted.sql
+        output: data/trusted/pmqc/pmqc.parquet
