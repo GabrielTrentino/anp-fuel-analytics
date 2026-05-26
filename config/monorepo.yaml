@@ -340,6 +340,9 @@ studies:
       - step: raw
         engine: python
         script: pipelines/python/download_producao_por_poco.py
+      - step: raw_prepare
+        engine: python
+        script: pipelines/python/prepare_producao_por_poco.py
       - step: trusted
         engine: sql
         script: pipelines/sql/producao-por-poco/trusted.sql
