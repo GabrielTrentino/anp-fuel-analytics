@@ -13,7 +13,7 @@ Rastreio alinhado ao [TODO do atlas](https://github.com/GabrielTrentino/anp-data
 | `cadastro-revendas-combustiveis` | ✓ | ✓ | ◐ |
 | `cadastro-revendas-glp` | ✓ | ✓ | ◐ |
 | `pontos-abastecimento` | ✓ | ◐ | — |
-| `distribuidores-combustiveis-liquidos` | ✓ | ◐ | — |
+| `distribuidores-combustiveis-liquidos` | ✓ | ✓ | ◐ |
 | `pmqc` | ✓ | ✓ | ◐ |
 | `pml` | ✓ | ◐ | — |
 | `serie-historica-precos` | ✓ | ✓ | ◐ |
