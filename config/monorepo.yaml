@@ -210,3 +210,62 @@ studies:
         engine: sql
         script: pipelines/sql/pml/trusted.sql
         output: data/trusted/pml/pml.parquet
+  fiscalizacao-abastecimento:
+    slug: fiscalizacao-abastecimento
+    title: Ações de Fiscalização do Abastecimento
+    atlas_doc: docs/conjuntos/fiscalizacao-abastecimento.md
+    paths:
+      raw: data/raw/fiscalizacao-abastecimento
+      trusted: data/trusted/fiscalizacao-abastecimento
+    pipeline:
+      - step: raw
+        engine: python
+        script: pipelines/python/download_fiscalizacao_abastecimento.py
+      - step: trusted
+        engine: python
+        script: pipelines/python/prepare_fiscalizacao_abastecimento.py
+  capacidade-armazenagem-terminais:
+    slug: capacidade-armazenagem-terminais
+    title: Capacidade de Armazenagem de Terminais
+    atlas_doc: docs/conjuntos/capacidade-armazenagem-terminais.md
+    paths:
+      raw: data/raw/capacidade-armazenagem-terminais
+      trusted: data/trusted/capacidade-armazenagem-terminais
+    pipeline:
+      - step: raw
+        engine: python
+        script: pipelines/python/download_capacidade_armazenagem_terminais.py
+      - step: trusted
+        engine: sql
+        script: pipelines/sql/capacidade-armazenagem-terminais/trusted.sql
+        output: data/trusted/capacidade-armazenagem-terminais/capacidade.parquet
+  movimentacao-terminais-aquaviarios:
+    slug: movimentacao-terminais-aquaviarios
+    title: Movimentação dos Terminais Aquaviários
+    atlas_doc: docs/conjuntos/movimentacao-terminais-aquaviarios.md
+    paths:
+      raw: data/raw/movimentacao-terminais-aquaviarios
+      trusted: data/trusted/movimentacao-terminais-aquaviarios
+    pipeline:
+      - step: raw
+        engine: python
+        script: pipelines/python/download_movimentacao_terminais_aquaviarios.py
+      - step: trusted
+        engine: sql
+        script: pipelines/sql/movimentacao-terminais-aquaviarios/trusted.sql
+        output: data/trusted/movimentacao-terminais-aquaviarios/movimentacao_terminais.parquet
+  registro-lubrificantes:
+    slug: registro-lubrificantes
+    title: Registro de Óleos e Graxas Lubrificantes
+    atlas_doc: docs/conjuntos/registro-lubrificantes.md
+    paths:
+      raw: data/raw/registro-lubrificantes
+      trusted: data/trusted/registro-lubrificantes
+    pipeline:
+      - step: raw
+        engine: python
+        script: pipelines/python/download_registro_lubrificantes.py
+      - step: trusted
+        engine: sql
+        script: pipelines/sql/registro-lubrificantes/trusted.sql
+        output: data/trusted/registro-lubrificantes/registro_lubrificantes.parquet
