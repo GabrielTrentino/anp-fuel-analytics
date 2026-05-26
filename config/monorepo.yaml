@@ -176,3 +176,20 @@ studies:
         engine: sql
         script: pipelines/sql/cadastro-revendas-glp/trusted.sql
         output: data/trusted/cadastro-revendas-glp/cadastro_revendas_glp.parquet
+  distribuidores-combustiveis-liquidos:
+    slug: distribuidores-combustiveis-liquidos
+    title: Distribuidores de Combustíveis Líquidos
+    atlas_doc: docs/conjuntos/distribuidores-combustiveis-liquidos.md
+    notebooks: estudos/distribuidores-combustiveis-liquidos/notebooks
+    paths:
+      raw: data/raw/distribuidores-combustiveis-liquidos
+      trusted: data/trusted/distribuidores-combustiveis-liquidos
+      refined: data/refined/distribuidores-combustiveis-liquidos
+    pipeline:
+      - step: raw
+        engine: python
+        script: pipelines/python/download_distribuidores_combustiveis_liquidos.py
+      - step: trusted
+        engine: sql
+        script: pipelines/sql/distribuidores-combustiveis-liquidos/trusted.sql
+        output: data/trusted/distribuidores-combustiveis-liquidos/distribuidores.parquet
