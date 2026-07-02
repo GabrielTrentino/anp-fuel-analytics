@@ -1,5 +1,8 @@
 -- Refined: agrega por mês (snapshot), UF, GrupoDeProdutos e Tag.
 -- Variáveis: {{TRUSTED_PARQUET}}, {{REFINED_DIR}}, {{REFINED_PARQUET}}
+--
+-- Snapshots com _qualidade_snapshot = 'parcial' (nov/dez 2022) são excluídos
+-- por padrão — cobertura incompleta confirmada no portal ANP (jul/2026).
 
 CREATE OR REPLACE TABLE refined AS
 WITH base AS (
@@ -28,6 +31,7 @@ WITH base AS (
       AND "GrupoDeProdutos" IS NOT NULL
       AND "Tag" IS NOT NULL
       AND "TancagemM3" IS NOT NULL
+      AND coalesce(_qualidade_snapshot, 'completo') = 'completo'
 )
 SELECT
     mes,
