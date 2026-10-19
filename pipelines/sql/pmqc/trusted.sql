@@ -29,7 +29,7 @@ SELECT
     CASE WHEN lower(trim("Conforme")) IN ('sim', 's', 'true', '1') THEN TRUE
          WHEN lower(trim("Conforme")) IN ('não', 'nao', 'n', 'false', '0') THEN FALSE
          ELSE NULL END AS conforme,
-    regexp_extract(filename, '([^/\\]+[/\\][^/\\]+)$', 1) AS _source_file
+    regexp_extract(replace(filename, '\', '/'), '([^/]+/[^/]+)$', 1) AS _source_file  -- AAAA/arquivo.csv, com / também no Windows
 FROM read_csv(
     '{{RAW_DIR}}/2*/*.csv',
     delim = ';',
