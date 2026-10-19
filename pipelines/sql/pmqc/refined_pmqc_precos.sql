@@ -1,6 +1,5 @@
 -- Refined: join PMQC x preços LPC — postos não-conformes praticam preço diferente?
--- Variáveis: {{TRUSTED_PARQUET}}, {{REFINED_DIR}}
--- Depende: data/trusted/serie-historica-precos/lpc_posto.parquet
+-- Variáveis: {{TRUSTED_PARQUET}} (pmqc), {{TRUSTED_LPC}} (preços), {{REFINED_DIR}}
 
 CREATE OR REPLACE TABLE pmqc_resumo AS
 SELECT
@@ -23,7 +22,7 @@ SELECT
     produto,
     avg(valor_venda) AS preco_medio_venda,
     count(*) AS coletas_preco
-FROM read_parquet('data/trusted/serie-historica-precos/lpc_posto.parquet')
+FROM read_parquet('{{TRUSTED_LPC}}')
 WHERE cnpj IS NOT NULL
   AND data_coleta IS NOT NULL
   AND valor_venda IS NOT NULL

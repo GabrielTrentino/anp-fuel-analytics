@@ -1,7 +1,6 @@
 """Identifica postos amostrados pelo PMQC que NÃO constam no cadastro oficial."""
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 
 import pandas as pd
@@ -27,7 +26,7 @@ def main() -> None:
     print()
 
     fora = pmqc[pmqc["cnpj"].isin(only_pmqc)].drop_duplicates(subset=["cnpj"])
-    print(f"Postos PMQC fora do cadastro por UF:")
+    print("Postos PMQC fora do cadastro por UF:")
     print(fora["uf"].value_counts().head(10).to_string())
     print()
 

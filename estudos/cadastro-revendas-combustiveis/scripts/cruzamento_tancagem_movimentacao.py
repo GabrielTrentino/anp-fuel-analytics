@@ -38,8 +38,8 @@ def main() -> None:
         lines += [
             "## Tancagem (por CNPJ)",
             "",
-            f"| Metrica | Valor |",
-            f"|---------|------:|",
+            "| Metrica | Valor |",
+            "|---------|------:|",
             f"| CNPJs cadastro revendas | {len(rev_cnpj):,} |",
             f"| CNPJs distintos tancagem (snapshots) | {len(tan_cnpj):,} |",
             f"| **Intersecao CNPJ** | **{len(match_tan):,}** ({100*len(match_tan)/len(rev_cnpj):.1f}% revendas) |",
@@ -61,13 +61,13 @@ def main() -> None:
         mov = pd.read_parquet(MOV, columns=["agente_regulado"])
         mov_names = mov["agente_regulado"].dropna().map(norm_name).unique()
         rev_by_name = rev.assign(_n=rev["razao_social"].map(norm_name)).drop_duplicates("_n")
-        name_to_cnpj = dict(zip(rev_by_name["_n"], rev_by_name["cnpj"]))
+        name_to_cnpj = dict(zip(rev_by_name["_n"], rev_by_name["cnpj"], strict=True))
         mov_mapped = sum(1 for n in mov_names if n in name_to_cnpj)
         lines += [
             "## Movimentacao liquidos (agente -> CNPJ via cadastro)",
             "",
-            f"| Metrica | Valor |",
-            f"|---------|------:|",
+            "| Metrica | Valor |",
+            "|---------|------:|",
             f"| Nomes agente unicos movimentacao | {len(mov_names):,} |",
             f"| Nomes com match razao social no cadastro | **{mov_mapped:,}** ({100*mov_mapped/len(mov_names):.1f}%) |",
             "",

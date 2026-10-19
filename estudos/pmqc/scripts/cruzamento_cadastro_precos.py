@@ -1,23 +1,31 @@
 """Cruzamento PMQC x cadastro-revendas x serie-historica-precos."""
 from __future__ import annotations
 
+from datetime import date
 from pathlib import Path
 
 import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 PMQC = REPO_ROOT / "data/trusted/pmqc/pmqc.parquet"
-CADASTRO = REPO_ROOT / "data/trusted/cadastro-revendas-combustiveis/cadastro_revendas.parquet"
+CADASTRO = REPO_ROOT / "data/trusted/cadastro-revendas-combustiveis/revendas.parquet"
 PRECOS = REPO_ROOT / "data/trusted/serie-historica-precos/lpc_posto.parquet"
 
 
 def main() -> None:
+    faltando = [p.relative_to(REPO_ROOT).as_posix() for p in (PMQC, CADASTRO, PRECOS) if not p.exists()]
+    if faltando:
+        raise SystemExit(f"Rode o pipeline antes (py pipelines/run.py <slug>). Ausentes: {faltando}")
+
     pmqc = pd.read_parquet(PMQC, columns=["cnpj", "uf", "data_coleta", "grupo_produto", "conforme"])
     lines = [
         "# Cruzamento PMQC x cadastro-revendas e precos",
         "",
         f"Base: `pmqc.parquet` — **{len(pmqc):,}** ensaios, {pmqc['data_coleta'].min()} – {pmqc['data_coleta'].max()}.",
         f"Postos distintos (CNPJ): **{pmqc['cnpj'].nunique():,}**",
+        "",
+        f"_Gerado em {date.today().isoformat()} a partir de `data/trusted/` "
+        "(rode `py estudos/pmqc/scripts/cruzamento_cadastro_precos.py` para atualizar)._",
         "",
     ]
 
@@ -31,8 +39,8 @@ def main() -> None:
         lines += [
             "## Cadastro revendas",
             "",
-            f"| Metrica | PMQC | Cadastro | Sobreposição |",
-            f"|---------|------|----------|--------------|",
+            "| Metrica | PMQC | Cadastro | Sobreposição |",
+            "|---------|------|----------|--------------|",
             f"| CNPJs distintos | {len(pmqc_cnpjs):,} | {len(cad_cnpjs):,} | **{len(overlap):,}** ({len(overlap)/len(pmqc_cnpjs)*100:.1f}%) |",
             "",
             "Join: `cnpj` — postos amostrados no PMQC que constam no cadastro.",
@@ -48,8 +56,8 @@ def main() -> None:
         lines += [
             "## Serie historica precos (LPC)",
             "",
-            f"| Metrica | PMQC | Precos | Sobreposição |",
-            f"|---------|------|--------|--------------|",
+            "| Metrica | PMQC | Precos | Sobreposição |",
+            "|---------|------|--------|--------------|",
             f"| CNPJs distintos | {len(pmqc_cnpjs):,} | {len(pre_cnpjs):,} | **{len(overlap_pre):,}** ({len(overlap_pre)/len(pmqc_cnpjs)*100:.1f}%) |",
             "",
             "Join: `cnpj` + `data_coleta` (semana) — correlacionar qualidade e preço.",
@@ -57,7 +65,7 @@ def main() -> None:
         ]
 
     # Nao conformidade por grupo
-    nc = pmqc[~pmqc["conforme"]]
+    nc = pmqc[pmqc["conforme"].eq(False)]
     if len(nc) > 0:
         lines += [
             "## Nao-conformidades",
@@ -69,7 +77,7 @@ def main() -> None:
         ]
         for gp in pmqc["grupo_produto"].unique():
             sub = pmqc[pmqc["grupo_produto"] == gp]
-            nc_gp = sub[~sub["conforme"]]
+            nc_gp = sub[sub["conforme"].eq(False)]
             lines.append(f"| {gp} | {len(nc_gp)} | {len(nc_gp)/len(sub)*100:.3f}% |")
         lines.append("")
 

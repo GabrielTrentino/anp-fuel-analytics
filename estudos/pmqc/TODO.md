@@ -4,7 +4,9 @@
 
 - [x] Download raw (26 CSVs, 2024–2026, nomes inconsistentes por ano)
 - [x] Profile (19 colunas, schema consistente, UTF-8-sig, sep `;`)
-- [x] Prepare (concat 26 arquivos → `_prepared/pmqc_all.csv`)
+- [x] ~~Prepare (concat → `_prepared/pmqc_all.csv`)~~ substituído: o trusted lê `data/raw/pmqc/AAAA/*.csv` direto (o `_prepared/` pode ser apagado)
+- [x] Duplicação por coordenada: a fonte repete cada ensaio uma vez por lat/long do posto; o trusted junta essas linhas (`n_coordenadas`)
+- [ ] ~10 mil pares `id_numeric + ensaio` ainda divergem em distribuidora/resultado — investigar
 - [x] Trusted (`pmqc.parquet` — 2.231.308 ensaios)
 - [x] Config `monorepo.yaml`
 - [x] Cruzamento preços LPC (29,3% overlap) e não-conformidades

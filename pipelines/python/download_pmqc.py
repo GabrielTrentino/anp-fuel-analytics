@@ -1,23 +1,23 @@
 """Download PMQC (Programa de Monitoramento da Qualidade dos Combustiveis).
 
 Portal: .../arquivos/pmqc/YYYY/<nome>.csv
-Naming varies by year — this script builds the known URL list.
+O nome do arquivo muda de ano para ano; a lista conhecida fica em MONTHLY.
+
+    py pipelines/python/download_pmqc.py --years 2016 2017 ... [--force] [--check]
 """
 from __future__ import annotations
 
 import argparse
 import sys
-import urllib.request
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "pipelines"))
 
-from core.config import study_paths  # noqa: E402
+from core.download import Remote, main_for  # noqa: E402
 
 SLUG = "pmqc"
 BASE = "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/pmqc"
-USER_AGENT = "Mozilla/5.0 (anp-fuel-analytics; research)"
 
 STATIC = [
     "pmqc-metadados.pdf",
@@ -47,54 +47,21 @@ MONTHLY: dict[int, list[str]] = {
 }
 
 
-def download(url: str, dest: Path) -> None:
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-    with urllib.request.urlopen(req, timeout=180) as resp:
-        dest.write_bytes(resp.read())
+def remotes(years: list[int]) -> list[Remote]:
+    out = [Remote(f"{BASE}/{name}", name) for name in STATIC]
+    for year in years:
+        if year not in MONTHLY:
+            print(f"skip year {year} (nao mapeado)")
+            continue
+        out += [Remote(f"{BASE}/{year}/{name}", f"{year}/{name}") for name in MONTHLY[year]]
+    return out
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--years", nargs="*", type=int, default=list(range(2024, 2027)))
-    args = parser.parse_args()
-
-    root = study_paths(SLUG)["raw"]
-    ok, fail = 0, 0
-
-    for name in STATIC:
-        url = f"{BASE}/{name}"
-        dest = root / name
-        if dest.exists() and dest.stat().st_size > 0:
-            ok += 1
-            continue
-        try:
-            print(f"get  {name}")
-            download(url, dest)
-            ok += 1
-        except Exception as e:
-            print(f"FAIL {name}: {e}")
-            fail += 1
-
-    for year in args.years:
-        if year not in MONTHLY:
-            print(f"skip year {year} (nao mapeado)")
-            continue
-        for name in MONTHLY[year]:
-            url = f"{BASE}/{year}/{name}"
-            dest = root / str(year) / name
-            if dest.exists() and dest.stat().st_size > 0:
-                ok += 1
-                continue
-            try:
-                print(f"get  {year}/{name}")
-                download(url, dest)
-                ok += 1
-            except Exception as e:
-                print(f"FAIL {year}/{name}: {e}")
-                fail += 1
-
-    print(f"\n{ok} ok, {fail} falhas -> {root.relative_to(REPO_ROOT)}")
+    args, rest = parser.parse_known_args()
+    main_for(SLUG, remotes(args.years), argv=rest)
 
 
 if __name__ == "__main__":
