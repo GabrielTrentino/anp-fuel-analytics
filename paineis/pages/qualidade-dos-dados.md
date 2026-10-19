@@ -13,6 +13,7 @@ select estudo,
        count(*) filter (where status = 'FALHA') as falhas,
        max(gerado_em) as gerado_em
 from anp.qualidade
+where status <> 'sem_relatorio'
 group by estudo
 order by falhas desc, avisos desc, estudo
 ```
@@ -36,7 +37,7 @@ e depois `py pipelines/run.py paineis`.
 ```sql problemas
 select estudo, tabela, regra, detalhe, status, falhas, nota
 from anp.qualidade
-where status <> 'ok'
+where status not in ('ok', 'sem_relatorio')
 order by status, estudo, tabela
 ```
 
