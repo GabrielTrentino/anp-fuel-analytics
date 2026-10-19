@@ -1,9 +1,9 @@
 """Converte xlsx (disfarçado de csv) de movimentacao-terminais para CSV real."""
 from __future__ import annotations
 
+import re
 import sys
 import unicodedata
-import re
 from pathlib import Path
 
 import pandas as pd
