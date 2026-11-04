@@ -67,12 +67,12 @@ def test_exportar_gera_todas_as_tabelas(repo):
 
     pmqc = con.sql("SELECT grupo_produto, amostras, amostras_nao_conformes FROM pmqc_mensal ORDER BY 1").fetchall()
     assert pmqc == [("Gasolina", 1, 0), ("Óleo Diesel", 1, 1)]
-    assert con.sql("SELECT sum(postos) FROM revendas_uf_bandeira").fetchone()[0] == 2
-    assert con.sql("SELECT vendas_m3 FROM vendas_mensal").fetchone()[0] == 15.0
+    assert con.sql("SELECT sum(postos) FROM revendas_uf_bandeira").fetchall()[0][0] == 2
+    assert con.sql("SELECT vendas_m3 FROM vendas_mensal").fetchall()[0][0] == 15.0
     semanas = con.sql("SELECT semana, uf, preco_medio FROM precos_semanais ORDER BY 1, 2").fetchall()
     assert [(str(s), uf, p) for s, uf, p in semanas] == [("2026-05-04", "SP", 6.2), ("2026-05-11", "PR", 6.2)]
-    assert con.sql("SELECT count(*) FROM qualidade").fetchone()[0] == 1
-    assert con.sql("SELECT linhas FROM fontes WHERE insumo = 'pmqc'").fetchone()[0] == 4
+    assert con.sql("SELECT count(*) FROM qualidade").fetchall()[0][0] == 1
+    assert con.sql("SELECT linhas FROM fontes WHERE insumo = 'pmqc'").fetchall()[0][0] == 4
 
 
 def test_exportar_falha_sem_insumo(repo):

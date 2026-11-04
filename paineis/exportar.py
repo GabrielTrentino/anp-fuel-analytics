@@ -17,6 +17,7 @@ import duckdb
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TARGET = Path("paineis") / "sources" / "anp" / "anp_paineis.duckdb"
+STORAGE_VERSION = "v1.4.0"  # versão do @duckdb/node-api usada pelo @evidence-dev/duckdb
 
 INPUTS = {
     "precos": "data/trusted/serie-historica-precos/lpc_posto.parquet",
@@ -108,7 +109,8 @@ def exportar(repo_root: Path = REPO_ROOT, target: Path | None = None) -> Path:
     target.parent.mkdir(parents=True, exist_ok=True)
     tmp = target.with_suffix(".tmp")
     tmp.unlink(missing_ok=True)
-    con = duckdb.connect(str(tmp))
+    # O Evidence lê com DuckDB 1.4 (node); o arquivo precisa sair no formato que ele abre.
+    con = duckdb.connect(str(tmp), config={"storage_compatibility_version": STORAGE_VERSION})
     try:
         for name, sql in EXTRATOS.items():
             con.execute(f"CREATE TABLE {name} AS {sql.format(**src)} ORDER BY ALL")
@@ -143,7 +145,7 @@ def exportar(repo_root: Path = REPO_ROOT, target: Path | None = None) -> Path:
     con = duckdb.connect(str(target), read_only=True)
     try:
         for (name,) in con.sql("SELECT table_name FROM duckdb_tables() ORDER BY 1").fetchall():
-            print(f"  {name:22} {con.sql(f'SELECT count(*) FROM {name}').fetchone()[0]:>8,} linhas")
+            print(f"  {name:22} {con.sql(f'SELECT count(*) FROM {name}').fetchall()[0][0]:>8,} linhas")
     finally:
         con.close()
     print(f"-> {target.as_posix()} ({target.stat().st_size / 1e6:.1f} MB)")
