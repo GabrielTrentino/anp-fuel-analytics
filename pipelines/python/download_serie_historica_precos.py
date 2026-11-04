@@ -1,21 +1,20 @@
-"""Download serie historica de precos (LPC) — MVP + dsan mensal."""
+"""Download serie historica de precos (LPC) — MVP + dsan mensal.
+
+    py pipelines/python/download_serie_historica_precos.py [--years 2024,2025] [--force] [--check]
+"""
 from __future__ import annotations
 
 import argparse
 import sys
-import urllib.request
-import zipfile
-from io import BytesIO
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "pipelines"))
 
-from core.config import study_paths  # noqa: E402
+from core.download import Remote, main_for  # noqa: E402
 
 SLUG = "serie-historica-precos"
 BASE = "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/shpc"
-USER_AGENT = "Mozilla/5.0 (anp-fuel-analytics; research)"
 
 DSAN_FAMILIES = (
     "precos-gasolina-etanol",
@@ -23,6 +22,7 @@ DSAN_FAMILIES = (
     "precos-glp",
 )
 
+# (subdir local, path relativo no portal)
 STATIC: list[tuple[str, str]] = [
     ("", "metadados-serie-historica-precos-combustiveis-1.pdf"),
     ("qus", "qus/ultimas-4-semanas-gasolina-etanol.csv"),
@@ -39,29 +39,19 @@ def dsan_files(years: list[int], months: range | None = None) -> list[tuple[str,
     for year in years:
         for fam in DSAN_FAMILIES:
             for m in months:
-                rel = f"dsan/{year}/{fam}-{m:02d}.csv"
-                out.append((f"dsan/{year}", rel))
+                out.append((f"dsan/{year}", f"dsan/{year}/{fam}-{m:02d}.csv"))
     return out
 
 
-def all_files(years: list[int] | None) -> list[tuple[str, str]]:
-    files = list(STATIC)
-    if years:
-        files.extend(dsan_files(years))
-    return files
-
-
-def download(url: str, dest: Path) -> None:
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-    with urllib.request.urlopen(req, timeout=180) as resp:
-        data = resp.read()
-    if dest.suffix.lower() == ".zip":
-        with zipfile.ZipFile(BytesIO(data)) as zf:
-            zf.extractall(dest.parent)
-        dest.write_bytes(data)
-    else:
-        dest.write_bytes(data)
+def remotes(years: list[int] | None) -> list[Remote]:
+    files = list(STATIC) + (dsan_files(years) if years else [])
+    out: list[Remote] = []
+    for sub, rel in files:
+        name = Path(rel).name
+        dest = f"{sub}/{name}" if sub else name
+        # ZIPs sao extraidos na propria pasta e mantidos (comportamento original)
+        out.append(Remote(f"{BASE}/{rel}", dest, extract_to=sub if rel.endswith(".zip") else None))
+    return out
 
 
 def main() -> None:
@@ -71,29 +61,9 @@ def main() -> None:
         default="",
         help="Anos dsan separados por virgula (ex.: 2024,2025). Vazio = so arquivos estaticos/MVP.",
     )
-    args = parser.parse_args()
-    years = [int(y.strip()) for y in args.years.split(",") if y.strip()] if args.years else None
-
-    root = study_paths(SLUG)["raw"]
-    ok, fail, skip = 0, 0, 0
-    for sub, rel in all_files(years):
-        url = f"{BASE}/{rel}"
-        name = Path(rel).name
-        dest = root / sub / name if sub else root / name
-        if dest.exists() and dest.stat().st_size > 0:
-            skip += 1
-            continue
-        try:
-            print(f"get  {dest.relative_to(REPO_ROOT)}")
-            download(url, dest)
-            ok += 1
-        except Exception as e:
-            print(f"FAIL {rel}: {e}")
-            fail += 1
-    print(
-        f"\n{ok} baixados, {skip} skip, {fail} falhas -> {root.relative_to(REPO_ROOT)}"
-        + (f" (dsan anos: {years})" if years else " (MVP)")
-    )
+    args, rest = parser.parse_known_args()
+    years = [int(y.strip()) for y in args.years.split(",") if y.strip()] or None
+    main_for(SLUG, remotes(years), argv=rest)
 
 
 if __name__ == "__main__":

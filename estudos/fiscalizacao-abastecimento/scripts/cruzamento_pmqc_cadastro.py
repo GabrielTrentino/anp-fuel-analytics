@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+
 import pandas as pd
 
 REPO = Path(__file__).resolve().parents[3]
@@ -13,7 +14,7 @@ def main() -> None:
     print(f"fiscalizacao: {len(fisc)} registros, {fisc['uf'].nunique()} UFs")
     print(f"  periodo: {fisc['data_fiscalizacao'].min()} a {fisc['data_fiscalizacao'].max()}")
     print(f"  segmentos: {fisc['segmento'].nunique()} unicos")
-    print(f"  resultados top-5:")
+    print("  resultados top-5:")
     print(fisc["resultado"].value_counts().head())
     print()
 
@@ -28,7 +29,7 @@ def main() -> None:
     else:
         print("PMQC trusted nao encontrado, pulando cruzamento.")
 
-    cad_path = TRUSTED / "cadastro-revendas-combustiveis" / "cadastro_revendas.parquet"
+    cad_path = TRUSTED / "cadastro-revendas-combustiveis" / "revendas.parquet"
     if cad_path.exists():
         cad = pd.read_parquet(cad_path)
         cad_cnpj = set(cad["cnpj"].dropna().unique())

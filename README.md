@@ -61,11 +61,32 @@ flowchart LR
 | `refined` | SQL | trusted | `data/refined/{slug}/*.parquet` |
 
 ```bash
-py pipelines/run.py tancagem-abastecimento          # todas as etapas
-py pipelines/run.py tancagem-abastecimento trusted  # uma etapa
+py pipelines/run.py --list                              # estudos e etapas
+py pipelines/run.py tancagem-abastecimento              # todas as etapas + testes de qualidade
+py pipelines/run.py tancagem-abastecimento trusted      # uma etapa
+py pipelines/run.py pmqc check                          # só os testes de qualidade
+py pipelines/run.py all --skip-raw                      # todos os estudos, sem baixar de novo
+py pipelines/run.py catalog                             # recria data/anp.duckdb (uma view por tabela)
 ```
 
-**RAW** permanece em Python (download e preparação). **TRUSTED** e **REFINED** usam arquivos `.sql` em `pipelines/sql/{slug}/`, executados via DuckDB com variáveis `{{RAW_DIR}}`, `{{TRUSTED_PARQUET}}`, etc.
+**RAW** permanece em Python. Estudos simples declaram os arquivos no bloco `download` do [`config/monorepo.yaml`](config/monorepo.yaml) e usam o downloader comum (`pipelines/core/download.py`: retry, escrita atômica e manifesto `data/raw/{slug}/_manifest.json` com URL, tamanho, sha256 e data). Estudos com regras próprias de nomes (PMQC, série histórica de preços, produção por poço) têm script em `pipelines/python/`, que monta a lista e chama o mesmo downloader. Todos aceitam `--force` (rebaixar) e `--check` (só testar as URLs).
+
+**TRUSTED** e **REFINED** usam arquivos `.sql` em `pipelines/sql/{slug}/`, executados via DuckDB com variáveis `{{RAW_DIR}}`, `{{TRUSTED_PARQUET}}` etc. Cada etapa SQL declara `outputs` no YAML; o `run.py` falha se uma saída declarada não for gerada, e variáveis extras vêm de `vars` na etapa.
+
+### Testes de qualidade
+
+O bloco `quality` de cada estudo declara regras sobre as tabelas geradas (`min_rows`, `not_null`, `unique`, `no_duplicate_rows`, `accepted_values`, `range`). Elas rodam ao fim de `run.py <slug>` (ou com `run.py <slug> check`) e gravam `data/quality/{slug}.json`. Regras com `severity: warn` registram anomalias conhecidas da fonte sem falhar o pipeline; as demais falham.
+
+### Ver as linhas
+
+`py pipelines/run.py catalog` cria `data/anp.duckdb` com uma view por saída (schema = estudo, ex.: `pmqc.trusted_pmqc`) e `meta.quality` com o resultado dos testes. Abra com `duckdb -ui data/anp.duckdb` (navegador de tabelas no browser), DBeaver ou Power BI.
+
+### CI
+
+- [`ci.yml`](.github/workflows/ci.yml): a cada push/PR roda `ruff` e `pytest` (Ubuntu e Windows). Os testes validam o YAML contra scripts e SQL, executam SQLs trusted com fixtures pequenas em `tests/fixtures/` e cobrem download e regras de qualidade.
+- [`portal.yml`](.github/workflows/portal.yml): toda segunda verifica se as URLs do portal ainda respondem.
+
+Para rodar localmente: `pip install -r requirements-dev.txt`, depois `ruff check .` e `pytest`.
 
 ## O que promover para o atlas (e o que não)
 
@@ -138,8 +159,8 @@ anp-fuel-analytics/
 │   └── monorepo.yaml              # estudos, caminhos e etapas do pipeline
 ├── pipelines/
 │   ├── run.py                     # orquestrador: py pipelines/run.py <slug> [step]
-│   ├── core/                       # config + executor SQL (DuckDB)
-│   ├── python/                    # etapas RAW (download, prepare)
+│   ├── core/                      # config, download, executor SQL, qualidade, catálogo
+│   ├── python/                    # RAW: download genérico + scripts com regras próprias, prepare
 │   └── sql/{slug}/                # etapas TRUSTED e REFINED
 ├── data/                          # local — não versionado
 │   ├── raw/{slug}/
@@ -148,6 +169,7 @@ anp-fuel-analytics/
 ├── estudos/{slug}/
 │   ├── README.md
 │   └── notebooks/
+├── tests/                         # pytest + fixtures pequenas no formato da ANP
 ├── requirements.txt
 └── README.md
 ```
@@ -157,7 +179,7 @@ anp-fuel-analytics/
 ```bash
 py -3 -m venv .venv
 .venv\Scripts\activate
-pip install -r requirements.txt
+pip install -r requirements-dev.txt   # inclui pytest e ruff
 jupyter lab
 ```
 

@@ -1,81 +1,267 @@
-# Configuração compartilhada do monorepo anp-fuel-analytics.
-# Caminhos são relativos à raiz do repositório.
+# Configuração do monorepo anp-fuel-analytics. Caminhos relativos à raiz do repositório.
+#
+# Cada estudo declara:
+#   download  — arquivos do portal (base + files). Estudos com regras próprias
+#               (pmqc, serie-historica-precos, producao-por-poco) usam script Python.
+#   pipeline  — etapas em ordem. engine: download | python | sql.
+#               Etapas SQL declaram `outputs` (contrato: o run.py falha se faltar algum)
+#               e `vars` extras usadas no .sql como {{NOME}}.
+#   quality   — testes de qualidade rodados por `py pipelines/run.py <slug> check`.
+#               Regras: min_rows, not_null, unique, no_duplicate_rows, accepted_values, range.
+#               `severity: warn` marca anomalia conhecida da fonte (não falha o pipeline).
 
 repo:
   name: anp-fuel-analytics
-  atlas_repo: anp-data-atlas  # referência documental (GitHub / path local)
-
+  atlas_repo: anp-data-atlas
 layers:
-  - raw       # Python — download e preparação
-  - trusted   # SQL — consolidação
-  - refined   # SQL — agregações analíticas
-
+- raw
+- trusted
+- refined
 paths:
   data: data
   pipelines: pipelines
   sql: pipelines/sql
   python: pipelines/python
-
 studies:
   tancagem-abastecimento:
     slug: tancagem-abastecimento
     title: Tancagem do Abastecimento Nacional de Combustíveis
-    atlas_doc: docs/conjuntos/tancagem-abastecimento.md  # no repositório anp-data-atlas
+    atlas_doc: docs/conjuntos/tancagem-abastecimento.md
     notebooks: estudos/tancagem-abastecimento/notebooks
-    trusted_uf_split: [GO, TO, DF]
+    trusted_uf_split:
+    - GO
+    - TO
+    - DF
     paths:
       raw: data/raw/tancagem-abastecimento
       trusted: data/trusted/tancagem-abastecimento
       trusted_uf: data/trusted/tancagem-abastecimento/uf
       refined: data/refined/tancagem-abastecimento
     pipeline:
-      - step: raw
-        engine: python
-        script: pipelines/python/download_tancagem.py
-      - step: raw_prepare
-        engine: python
-        script: pipelines/python/prepare_tancagem_raw.py
-      - step: trusted
-        engine: sql
-        script: pipelines/sql/tancagem-abastecimento/trusted.sql
-        output: data/trusted/tancagem-abastecimento/tancagem.parquet
-      - step: trusted_uf
-        engine: sql
-        script: pipelines/sql/tancagem-abastecimento/split_trusted_ufs.sql
-      - step: refined
-        engine: sql
-        script: pipelines/sql/tancagem-abastecimento/refined.sql
-        output: data/refined/tancagem-abastecimento/tancagem_por_mes_uf_grupo_tag.parquet
+    - step: raw
+      engine: download
+    - step: raw_prepare
+      engine: python
+      script: pipelines/python/prepare_tancagem_raw.py
+    - step: trusted
+      engine: sql
+      script: pipelines/sql/tancagem-abastecimento/trusted.sql
+      outputs:
+      - data/trusted/tancagem-abastecimento/tancagem.parquet
+    - step: trusted_uf
+      engine: sql
+      script: pipelines/sql/tancagem-abastecimento/split_trusted_ufs.sql
+      vars:
+        TRUSTED_PARQUET: data/trusted/tancagem-abastecimento/tancagem.parquet
+      outputs:
+      - data/trusted/tancagem-abastecimento/uf/GO.parquet
+      - data/trusted/tancagem-abastecimento/uf/TO.parquet
+      - data/trusted/tancagem-abastecimento/uf/DF.parquet
+    - step: refined
+      engine: sql
+      script: pipelines/sql/tancagem-abastecimento/refined.sql
+      vars:
+        TRUSTED_PARQUET: data/trusted/tancagem-abastecimento/tancagem.parquet
+        REFINED_PARQUET: data/refined/tancagem-abastecimento/tancagem_por_mes_uf_grupo_tag.parquet
+      outputs:
+      - data/refined/tancagem-abastecimento/tancagem_por_mes_uf_grupo_tag.parquet
+    download:
+      base: https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/arquivos-tancagem-do-abastecimento-nacional-de-combustiveis
+      timeout: 120
+      files:
+      - metadados-tancagem.pdf
+      - src: dados-abertos/2026/janeiro.csv
+        dest: 2026/janeiro.csv
+      - src: dados-abertos/2026/fevereiro.csv
+        dest: 2026/fevereiro.csv
+      - src: dados-abertos/2026/marco.csv
+        dest: 2026/marco.csv
+      - src: dados-abertos/2026/abril.csv
+        dest: 2026/abril.csv
+      - src: dados-abertos/2025/janeiro.csv
+        dest: 2025/janeiro.csv
+      - src: dados-abertos/2025/fevereiro.csv
+        dest: 2025/fevereiro.csv
+      - src: dados-abertos/2025/marco.csv
+        dest: 2025/marco.csv
+      - src: dados-abertos/2025/maio-junho.csv
+        dest: 2025/maio-junho.csv
+      - src: dados-abertos/2025/julho-agosto.csv
+        dest: 2025/julho-agosto.csv
+      - src: dados-abertos/2025/setembro-a-novembro.csv
+        dest: 2025/setembro-a-novembro.csv
+      - src: dados-abertos/2025/dezembro.csv
+        dest: 2025/dezembro.csv
+      - src: dados-abertos/2024/janeiro.csv
+        dest: 2024/janeiro.csv
+      - src: dados-abertos/2024/fevereiro.csv
+        dest: 2024/fevereiro.csv
+      - src: dados-abertos/2024/marco-julho.csv
+        dest: 2024/marco-julho.csv
+      - src: dados-abertos/2024/agosto.csv
+        dest: 2024/agosto.csv
+      - src: dados-abertos/2024/setembro-outubro.csv
+        dest: 2024/setembro-outubro.csv
+      - src: dados-abertos/2024/novembro.csv
+        dest: 2024/novembro.csv
+      - src: dados-abertos/2024/dezembro.csv
+        dest: 2024/dezembro.csv
+      - src: dados-abertos/2023/janeiro.csv
+        dest: 2023/janeiro.csv
+      - src: dados-abertos/2023/fevereiro.csv
+        dest: 2023/fevereiro.csv
+      - src: dados-abertos/2023/marco.csv
+        dest: 2023/marco.csv
+      - src: dados-abertos/2023/abril.csv
+        dest: 2023/abril.csv
+      - src: dados-abertos/2023/maio.csv
+        dest: 2023/maio.csv
+      - src: dados-abertos/2023/junho.csv
+        dest: 2023/junho.csv
+      - src: dados-abertos/2023/agosto.csv
+        dest: 2023/agosto.csv
+      - src: dados-abertos/2023/setembro.csv
+        dest: 2023/setembro.csv
+      - src: dados-abertos/2023/outubro.csv
+        dest: 2023/outubro.csv
+      - src: dados-abertos/2023/novembro.csv
+        dest: 2023/novembro.csv
+      - src: dados-abertos/2023/dezembro.csv
+        dest: 2023/dezembro.csv
+      - src: dados-abertos/2022/tancagem_terminais_dados_abertos_junho_2022.csv
+        dest: 2022/tancagem_terminais_dados_abertos_junho_2022.csv
+      - src: dados-abertos/2022/tancagem_terminais_dados_abertos_julho_2022.csv
+        dest: 2022/tancagem_terminais_dados_abertos_julho_2022.csv
+      - src: dados-abertos/2022/tancagem_terminais_dados_abertos_v1.csv
+        dest: 2022/tancagem_terminais_dados_abertos_v1.csv
+      - src: dados-abertos/2022/tancagem_terminais_dados_abertos_2022_09_01.csv
+        dest: 2022/tancagem_terminais_dados_abertos_2022_09_01.csv
+      - src: dados-abertos/2022/tancagem_terminais_dados_abertos_outubro_2022-csv.xlsx
+        dest: 2022/tancagem_terminais_dados_abertos_outubro_2022-csv.xlsx
+      - src: dados-abertos/2022/tancagem_terminais_dados_abertos_novembro_2022.csv
+        dest: 2022/tancagem_terminais_dados_abertos_novembro_2022.csv
+      - src: dados-abertos/2022/tancagem_terminais_dados_abertos_dezembro_2022.csv
+        dest: 2022/tancagem_terminais_dados_abertos_dezembro_2022.csv
+    quality:
+    - table: data/trusted/tancagem-abastecimento/tancagem.parquet
+      min_rows: 100000
+      not_null:
+      - Data
+      - CodInstalacao
+      - GrupoDeProdutos
+      - TancagemM3
+      unique:
+        columns:
+        - Data
+        - CodInstalacao
+        - Tag
+        - GrupoDeProdutos
+        severity: warn
+        note: arquivos de 2023-2024 com periodos sobrepostos repetem a mesma Data (41 mil linhas)
+      accepted_values:
+        Uf: &id001
+        - AC
+        - AL
+        - AM
+        - AP
+        - BA
+        - CE
+        - DF
+        - ES
+        - GO
+        - MA
+        - MG
+        - MS
+        - MT
+        - PA
+        - PB
+        - PE
+        - PI
+        - PR
+        - RJ
+        - RN
+        - RO
+        - RR
+        - RS
+        - SC
+        - SE
+        - SP
+        - TO
   movimentacao-derivados:
     slug: movimentacao-derivados
     title: Movimentação de derivados de petróleo, gás natural e biocombustíveis
     atlas_doc: docs/conjuntos/movimentacao-derivados.md
     notebooks: estudos/movimentacao-derivados/notebooks
     products:
-      - liquidos
-      - glp
-      - lubrificante
-      - trr
-      - aviacao
-      - asfalto
-      - solvente
-      - fornecedores-vendas-diretas
-      - movimentacaologistica
+    - liquidos
+    - glp
+    - lubrificante
+    - trr
+    - aviacao
+    - asfalto
+    - solvente
+    - fornecedores-vendas-diretas
+    - movimentacaologistica
     paths:
       raw: data/raw/movimentacao-derivados
       trusted: data/trusted/movimentacao-derivados
       refined: data/refined/movimentacao-derivados
     pipeline:
-      - step: raw
-        engine: python
-        script: pipelines/python/download_movimentacao_derivados.py
-      - step: raw_prepare
-        engine: python
-        script: pipelines/python/prepare_movimentacao_raw.py
-      - step: trusted_liquidos
-        engine: sql
-        script: pipelines/sql/movimentacao-derivados/trusted_liquidos_vendas.sql
-        output: data/trusted/movimentacao-derivados/liquidos_vendas_atual.parquet
+    - step: raw
+      engine: download
+    - step: raw_prepare
+      engine: python
+      script: pipelines/python/prepare_movimentacao_raw.py
+    - step: trusted_liquidos
+      engine: sql
+      script: pipelines/sql/movimentacao-derivados/trusted_liquidos_vendas.sql
+      outputs:
+      - data/trusted/movimentacao-derivados/liquidos_vendas_atual.parquet
+    download:
+      base: https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/mdpg
+      files:
+      - metadado-unificado-logistica.pdf
+      - src: liquidos.zip
+        extract_to: liquidos
+        extract_marker: true
+      - src: glp.zip
+        extract_to: glp
+        extract_marker: true
+      - src: lubrificante.zip
+        extract_to: lubrificante
+        extract_marker: true
+      - src: trr.zip
+        extract_to: trr
+        extract_marker: true
+      - src: aviacao.zip
+        extract_to: aviacao
+        extract_marker: true
+      - src: asfalto.zip
+        extract_to: asfalto
+        extract_marker: true
+      - src: solvente.zip
+        extract_to: solvente
+        extract_marker: true
+      - src: fornecedores-vendas-diretas.zip
+        extract_to: fornecedores-vendas-diretas
+        extract_marker: true
+      - src: movimentacaologistica.zip
+        extract_to: movimentacaologistica
+        extract_marker: true
+    quality:
+    - table: data/trusted/movimentacao-derivados/liquidos_vendas_atual.parquet
+      min_rows: 100000
+      not_null:
+      - data_referencia
+      - agente_regulado
+      - codigo_produto
+      unique:
+      - data_referencia
+      - agente_regulado
+      - codigo_produto
+      - uf_origem
+      - uf_destino
+      - mercado_destinatario
   cadastro-revendas-combustiveis:
     slug: cadastro-revendas-combustiveis
     title: Dados Cadastrais dos Revendedores Varejistas de Combustíveis Automotivos
@@ -86,17 +272,37 @@ studies:
       trusted: data/trusted/cadastro-revendas-combustiveis
       refined: data/refined/cadastro-revendas-combustiveis
     pipeline:
-      - step: raw
-        engine: python
-        script: pipelines/python/download_cadastro_revendas_combustiveis.py
-      - step: trusted
-        engine: sql
-        script: pipelines/sql/cadastro-revendas-combustiveis/trusted.sql
-        output: data/trusted/cadastro-revendas-combustiveis/revendas.parquet
-      - step: refined
-        engine: sql
-        script: pipelines/sql/cadastro-revendas-combustiveis/refined_preco_bandeira.sql
-        output: data/refined/cadastro-revendas-combustiveis/preco_por_bandeira_uf.parquet
+    - step: raw
+      engine: download
+    - step: trusted
+      engine: sql
+      script: pipelines/sql/cadastro-revendas-combustiveis/trusted.sql
+      outputs:
+      - data/trusted/cadastro-revendas-combustiveis/revendas.parquet
+    - step: refined
+      engine: sql
+      script: pipelines/sql/cadastro-revendas-combustiveis/refined_preco_bandeira.sql
+      vars:
+        TRUSTED_CADASTRO: data/trusted/cadastro-revendas-combustiveis/revendas.parquet
+        TRUSTED_LPC: data/trusted/serie-historica-precos/lpc_posto.parquet
+        TRUSTED_DIESEL: data/trusted/serie-historica-precos/dsan_diesel_gnv_2024_2025.parquet
+      outputs:
+      - data/refined/cadastro-revendas-combustiveis/preco_por_bandeira_uf.parquet
+    download:
+      base: https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/arquivos-dados-cadastrais-dos-revendedores-varejistas-de-combustiveis-automotivos
+      files:
+      - metadados-revendedores-varejistas-combustiveis-automoveis.pdf
+      - dados-cadastrais-revendedores-varejistas-combustiveis-automoveis.csv
+    quality:
+    - table: data/trusted/cadastro-revendas-combustiveis/revendas.parquet
+      min_rows: 10000
+      not_null:
+      - cnpj
+      - uf
+      unique:
+      - cnpj
+      accepted_values:
+        uf: *id001
   serie-historica-precos:
     slug: serie-historica-precos
     title: Série Histórica de Preços de Combustíveis
@@ -107,25 +313,80 @@ studies:
       trusted: data/trusted/serie-historica-precos
       refined: data/refined/serie-historica-precos
     pipeline:
-      - step: raw
-        engine: python
-        script: pipelines/python/download_serie_historica_precos.py
-      - step: trusted_qus_gasolina
-        engine: sql
-        script: pipelines/sql/serie-historica-precos/trusted_qus_gasolina.sql
-        output: data/trusted/serie-historica-precos/qus_gasolina_etanol.parquet
-      - step: trusted_dsan_gasolina
-        engine: sql
-        script: pipelines/sql/serie-historica-precos/trusted_dsan_gasolina_etanol.sql
-        output: data/trusted/serie-historica-precos/dsan_gasolina_etanol_2024_2025.parquet
-      - step: trusted_lpc_posto
-        engine: sql
-        script: pipelines/sql/serie-historica-precos/trusted_lpc_posto.sql
-        output: data/trusted/serie-historica-precos/lpc_posto.parquet
-      - step: trusted_dsan_diesel_gnv
-        engine: sql
-        script: pipelines/sql/serie-historica-precos/trusted_dsan_diesel_gnv.sql
-        output: data/trusted/serie-historica-precos/dsan_diesel_gnv_2024_2025.parquet
+    - step: raw
+      engine: python
+      script: pipelines/python/download_serie_historica_precos.py
+    - step: trusted_qus_gasolina
+      engine: sql
+      script: pipelines/sql/serie-historica-precos/trusted_qus_gasolina.sql
+      outputs:
+      - data/trusted/serie-historica-precos/qus_gasolina_etanol.parquet
+    - step: trusted_dsan_gasolina
+      engine: sql
+      script: pipelines/sql/serie-historica-precos/trusted_dsan_gasolina_etanol.sql
+      outputs:
+      - data/trusted/serie-historica-precos/dsan_gasolina_etanol_2024_2025.parquet
+    - step: trusted_lpc_posto
+      engine: sql
+      script: pipelines/sql/serie-historica-precos/trusted_lpc_posto.sql
+      outputs:
+      - data/trusted/serie-historica-precos/lpc_posto.parquet
+    - step: trusted_dsan_diesel_gnv
+      engine: sql
+      script: pipelines/sql/serie-historica-precos/trusted_dsan_diesel_gnv.sql
+      outputs:
+      - data/trusted/serie-historica-precos/dsan_diesel_gnv_2024_2025.parquet
+    quality:
+    - table: data/trusted/serie-historica-precos/lpc_posto.parquet
+      min_rows: 100000
+      not_null:
+      - cnpj
+      - produto
+      - data_coleta
+      - valor_venda
+      unique:
+        columns:
+        - cnpj
+        - produto
+        - data_coleta
+        severity: warn
+        note: poucas coletas repetidas na fonte
+      accepted_values:
+        uf: *id001
+      range:
+        valor_venda:
+          min: 0
+          max: 250
+    - table: data/trusted/serie-historica-precos/dsan_gasolina_etanol_2024_2025.parquet
+      min_rows: 100000
+      not_null:
+      - cnpj
+      - produto
+      - data_coleta
+      unique:
+        columns:
+        - cnpj
+        - produto
+        - data_coleta
+        severity: warn
+    - table: data/trusted/serie-historica-precos/dsan_diesel_gnv_2024_2025.parquet
+      min_rows: 100000
+      not_null:
+      - cnpj
+      - produto
+      - data_coleta
+      unique:
+        columns:
+        - cnpj
+        - produto
+        - data_coleta
+        severity: warn
+    - table: data/trusted/serie-historica-precos/qus_gasolina_etanol.parquet
+      min_rows: 1000
+      unique:
+      - cnpj
+      - produto
+      - data_coleta
   vendas-derivados:
     slug: vendas-derivados
     title: Vendas de derivados de petróleo e biocombustíveis
@@ -136,36 +397,114 @@ studies:
       trusted: data/trusted/vendas-derivados
       refined: data/refined/vendas-derivados
     pipeline:
-      - step: raw
-        engine: python
-        script: pipelines/python/download_vendas_derivados.py
-      - step: raw_prepare
-        engine: python
-        script: pipelines/python/prepare_vendas_derivados_raw.py
-      - step: trusted_mensal
-        engine: sql
-        script: pipelines/sql/vendas-derivados/trusted_mensal.sql
-        output: data/trusted/vendas-derivados/vendas_mensal.parquet
-      - step: trusted_segmento
-        engine: sql
-        script: pipelines/sql/vendas-derivados/trusted_segmento.sql
-        output: data/trusted/vendas-derivados/vendas_segmento.parquet
-      - step: trusted_diesel_tipo
-        engine: sql
-        script: pipelines/sql/vendas-derivados/trusted_diesel_tipo.sql
-        output: data/trusted/vendas-derivados/vendas_diesel_tipo.parquet
-      - step: trusted_glp_vasilhame
-        engine: sql
-        script: pipelines/sql/vendas-derivados/trusted_glp_vasilhame.sql
-        output: data/trusted/vendas-derivados/vendas_glp_vasilhame.parquet
-      - step: trusted_biodiesel
-        engine: sql
-        script: pipelines/sql/vendas-derivados/trusted_biodiesel.sql
-        output: data/trusted/vendas-derivados/vendas_biodiesel.parquet
-      - step: trusted_municipal
-        engine: sql
-        script: pipelines/sql/vendas-derivados/trusted_municipal.sql
-        output: data/trusted/vendas-derivados/vendas_municipal.parquet
+    - step: raw
+      engine: download
+    - step: raw_prepare
+      engine: python
+      script: pipelines/python/prepare_vendas_derivados_raw.py
+    - step: trusted_mensal
+      engine: sql
+      script: pipelines/sql/vendas-derivados/trusted_mensal.sql
+      outputs:
+      - data/trusted/vendas-derivados/vendas_mensal.parquet
+    - step: trusted_segmento
+      engine: sql
+      script: pipelines/sql/vendas-derivados/trusted_segmento.sql
+      outputs:
+      - data/trusted/vendas-derivados/vendas_segmento.parquet
+    - step: trusted_diesel_tipo
+      engine: sql
+      script: pipelines/sql/vendas-derivados/trusted_diesel_tipo.sql
+      outputs:
+      - data/trusted/vendas-derivados/vendas_diesel_tipo.parquet
+    - step: trusted_glp_vasilhame
+      engine: sql
+      script: pipelines/sql/vendas-derivados/trusted_glp_vasilhame.sql
+      outputs:
+      - data/trusted/vendas-derivados/vendas_glp_vasilhame.parquet
+    - step: trusted_biodiesel
+      engine: sql
+      script: pipelines/sql/vendas-derivados/trusted_biodiesel.sql
+      outputs:
+      - data/trusted/vendas-derivados/vendas_biodiesel.parquet
+    - step: trusted_municipal
+      engine: sql
+      script: pipelines/sql/vendas-derivados/trusted_municipal.sql
+      outputs:
+      - data/trusted/vendas-derivados/vendas_municipal.parquet
+    download:
+      base: https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/vdpb
+      files:
+      - src: vendas-derivados-petroleo-e-etanol/metadados-vendas-derivados-petroleo-etanol.pdf
+        dest: metadados-vendas-derivados-petroleo-etanol.pdf
+      - src: vendas-derivados-petroleo-e-etanol/vendas-combustiveis-m3-1990-2025.csv
+        dest: vendas-combustiveis-m3-1990-2025.csv
+      - src: vcs/metadados-vendas-combustiveis-por-segmento.pdf
+        dest: segmento/metadados-vendas-combustiveis-por-segmento.pdf
+      - src: vcs/vendas-combustiveis-segmento-m3-2012-2025.csv
+        dest: segmento/vendas-combustiveis-segmento-m3-2012-2025.csv
+      - src: vct/metadados-vendas-oleo-diesel-por-tipo.pdf
+        dest: tipo/metadados-vendas-oleo-diesel-por-tipo.pdf
+      - src: vct/vendas-oleo-diesel-tipo-m3-2013-2025.csv
+        dest: tipo/vendas-oleo-diesel-tipo-m3-2013-2025.csv
+      - src: vct/metadados-vendas-glp-por-tipo-vasilhame.pdf
+        dest: tipo/metadados-vendas-glp-por-tipo-vasilhame.pdf
+      - src: vct/vendas-glp-tipo-vasilhame-m3-2007-2025.csv
+        dest: tipo/vendas-glp-tipo-vasilhame-m3-2007-2025.csv
+      - src: vendas-de-biodiesel/metadados-vendas-biodiesel-b100.pdf
+        dest: biodiesel/metadados-vendas-biodiesel-b100.pdf
+      - src: vendas-de-biodiesel/vendas-biodiesel-b100-m3.csv
+        dest: biodiesel/vendas-biodiesel-b100-m3.csv
+      - src: vaehdpm/gasolina-c/vendas-anuais-de-gasolina-c-por-municipio.csv
+        dest: municipio/vendas-anuais-de-gasolina-c-por-municipio.csv
+      - src: vaehdpm/oleo-diesel/vendas-anuais-de-oleo-diesel-por-municipio.csv
+        dest: municipio/vendas-anuais-de-oleo-diesel-por-municipio.csv
+      - src: vaehdpm/etanol-hidratado/vendas-anuais-de-etanol-hidratado-por-municipio.csv
+        dest: municipio/vendas-anuais-de-etanol-hidratado-por-municipio.csv
+      - src: vaehdpm/glp/vendas-anuais-de-glp-por-municipio.csv
+        dest: municipio/vendas-anuais-de-glp-por-municipio.csv
+    quality:
+    - table: data/trusted/vendas-derivados/vendas_mensal.parquet
+      min_rows: 10000
+      unique:
+      - data_referencia
+      - uf
+      - produto
+    - table: data/trusted/vendas-derivados/vendas_segmento.parquet
+      min_rows: 1000
+      unique:
+      - data_referencia
+      - uf
+      - produto
+      - segmento
+    - table: data/trusted/vendas-derivados/vendas_diesel_tipo.parquet
+      min_rows: 1000
+      unique:
+      - data_referencia
+      - uf
+      - produto
+    - table: data/trusted/vendas-derivados/vendas_glp_vasilhame.parquet
+      min_rows: 1000
+      unique:
+      - data_referencia
+      - uf
+      - vasilhame
+    - table: data/trusted/vendas-derivados/vendas_biodiesel.parquet
+      min_rows: 100
+      unique:
+      - data_referencia
+      - regiao_origem
+      - regiao_destino
+    - table: data/trusted/vendas-derivados/vendas_municipal.parquet
+      min_rows: 100000
+      not_null:
+      - ano
+      - cod_ibge
+      - produto
+      unique:
+      - ano
+      - cod_ibge
+      - produto
   pmqc:
     slug: pmqc
     title: Programa de Monitoramento da Qualidade dos Combustíveis
@@ -176,24 +515,60 @@ studies:
       trusted: data/trusted/pmqc
       refined: data/refined/pmqc
     pipeline:
-      - step: raw
-        engine: python
-        script: pipelines/python/download_pmqc.py
-      - step: raw_prepare
-        engine: python
-        script: pipelines/python/prepare_pmqc_raw.py
-      - step: trusted
-        engine: sql
-        script: pipelines/sql/pmqc/trusted.sql
-        output: data/trusted/pmqc/pmqc.parquet
-      - step: refined
-        engine: sql
-        script: pipelines/sql/pmqc/refined_nao_conformidade.sql
-        output: data/refined/pmqc/nao_conformidade_uf_produto.parquet
-      - step: refined
-        engine: sql
-        script: pipelines/sql/pmqc/refined_pmqc_precos.sql
-        output: data/refined/pmqc/pmqc_precos_join.parquet
+    - step: raw
+      engine: python
+      script: pipelines/python/download_pmqc.py
+      args:
+      - --years
+      - '2016'
+      - '2017'
+      - '2018'
+      - '2019'
+      - '2020'
+      - '2021'
+      - '2022'
+      - '2023'
+      - '2024'
+      - '2025'
+      - '2026'
+    - step: trusted
+      engine: sql
+      script: pipelines/sql/pmqc/trusted.sql
+      outputs:
+      - data/trusted/pmqc/pmqc.parquet
+    - step: refined_nao_conformidade
+      engine: sql
+      script: pipelines/sql/pmqc/refined_nao_conformidade.sql
+      vars:
+        TRUSTED_PARQUET: data/trusted/pmqc/pmqc.parquet
+      outputs:
+      - data/refined/pmqc/nao_conformidade_uf_produto.parquet
+    - step: refined_precos
+      engine: sql
+      script: pipelines/sql/pmqc/refined_pmqc_precos.sql
+      vars:
+        TRUSTED_PARQUET: data/trusted/pmqc/pmqc.parquet
+        TRUSTED_LPC: data/trusted/serie-historica-precos/lpc_posto.parquet
+      outputs:
+      - data/refined/pmqc/pmqc_precos_join.parquet
+      - data/refined/pmqc/resumo_preco_conformidade.parquet
+    quality:
+    - table: data/trusted/pmqc/pmqc.parquet
+      min_rows: 1000000
+      not_null:
+      - data_coleta
+      - id_numeric
+      - ensaio
+      - conforme
+      no_duplicate_rows: true
+      unique:
+        columns:
+        - id_numeric
+        - ensaio
+        severity: warn
+        note: ~10 mil ensaios com atributos divergentes (distribuidora, resultado) na fonte
+      accepted_values:
+        uf: *id001
   cadastro-revendas-glp:
     slug: cadastro-revendas-glp
     title: Dados Cadastrais das Revendas de GLP
@@ -204,13 +579,28 @@ studies:
       trusted: data/trusted/cadastro-revendas-glp
       refined: data/refined/cadastro-revendas-glp
     pipeline:
-      - step: raw
-        engine: python
-        script: pipelines/python/download_cadastro_revendas_glp.py
-      - step: trusted
-        engine: sql
-        script: pipelines/sql/cadastro-revendas-glp/trusted.sql
-        output: data/trusted/cadastro-revendas-glp/cadastro_revendas_glp.parquet
+    - step: raw
+      engine: download
+    - step: trusted
+      engine: sql
+      script: pipelines/sql/cadastro-revendas-glp/trusted.sql
+      outputs:
+      - data/trusted/cadastro-revendas-glp/cadastro_revendas_glp.parquet
+    download:
+      base: https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/arquivos-dados-cadastrais-das-revendas-de-gas-liquefeito-de-petroleo-glp
+      files:
+      - metadados-revenda-glp.pdf
+      - cadastro-revendas-glp.csv
+    quality:
+    - table: data/trusted/cadastro-revendas-glp/cadastro_revendas_glp.parquet
+      min_rows: 10000
+      not_null:
+      - cnpj
+      unique:
+        columns:
+        - cnpj
+        severity: warn
+        note: 3 CNPJs repetidos na fonte
   distribuidores-combustiveis-liquidos:
     slug: distribuidores-combustiveis-liquidos
     title: Distribuidores de Combustíveis Líquidos
@@ -221,13 +611,29 @@ studies:
       trusted: data/trusted/distribuidores-combustiveis-liquidos
       refined: data/refined/distribuidores-combustiveis-liquidos
     pipeline:
-      - step: raw
-        engine: python
-        script: pipelines/python/download_distribuidores_combustiveis_liquidos.py
-      - step: trusted
-        engine: sql
-        script: pipelines/sql/distribuidores-combustiveis-liquidos/trusted.sql
-        output: data/trusted/distribuidores-combustiveis-liquidos/distribuidores.parquet
+    - step: raw
+      engine: download
+    - step: trusted
+      engine: sql
+      script: pipelines/sql/distribuidores-combustiveis-liquidos/trusted.sql
+      outputs:
+      - data/trusted/distribuidores-combustiveis-liquidos/distribuidores.parquet
+    download:
+      base: https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/dcl
+      files:
+      - metadados-aea-distliq-27out21.pdf
+      - metadados-ce-cr-26ago21.pdf
+      - metadados-inutilizadora-26ago21.pdf
+      - planilha-aea-filiais.csv
+      - ce-cr.csv
+      - inutilizadores.csv
+    quality:
+    - table: data/trusted/distribuidores-combustiveis-liquidos/distribuidores.parquet
+      min_rows: 100
+      not_null:
+      - cnpj
+      unique:
+      - cnpj
   pml:
     slug: pml
     title: Programa de Monitoramento dos Lubrificantes
@@ -238,13 +644,28 @@ studies:
       trusted: data/trusted/pml
       refined: data/refined/pml
     pipeline:
-      - step: raw
-        engine: python
-        script: pipelines/python/download_pml.py
-      - step: trusted
-        engine: sql
-        script: pipelines/sql/pml/trusted.sql
-        output: data/trusted/pml/pml.parquet
+    - step: raw
+      engine: download
+    - step: trusted
+      engine: sql
+      script: pipelines/sql/pml/trusted.sql
+      outputs:
+      - data/trusted/pml/pml.parquet
+    download:
+      base: https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/arquivos-pml
+      files:
+      - metadados-pml.pdf
+      - dados-abertos-pml.csv
+    quality:
+    - table: data/trusted/pml/pml.parquet
+      min_rows: 1000
+      not_null:
+      - amostra
+      unique:
+        columns:
+        - amostra
+        severity: warn
+        note: 29 amostras repetidas na fonte
   fiscalizacao-abastecimento:
     slug: fiscalizacao-abastecimento
     title: Ações de Fiscalização do Abastecimento
@@ -254,16 +675,33 @@ studies:
       trusted: data/trusted/fiscalizacao-abastecimento
       refined: data/refined/fiscalizacao-abastecimento
     pipeline:
-      - step: raw
-        engine: python
-        script: pipelines/python/download_fiscalizacao_abastecimento.py
-      - step: raw_prepare
-        engine: python
-        script: pipelines/python/prepare_fiscalizacao_abastecimento.py
-      - step: trusted
-        engine: sql
-        script: pipelines/sql/fiscalizacao-abastecimento/trusted.sql
-        output: data/trusted/fiscalizacao-abastecimento/fiscalizacao.parquet
+    - step: raw
+      engine: download
+    - step: raw_prepare
+      engine: python
+      script: pipelines/python/prepare_fiscalizacao_abastecimento.py
+    - step: trusted
+      engine: sql
+      script: pipelines/sql/fiscalizacao-abastecimento/trusted.sql
+      outputs:
+      - data/trusted/fiscalizacao-abastecimento/fiscalizacao.parquet
+    download:
+      timeout: 300
+      files:
+      - url: https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/arquivos-acoes-de-fiscalizacao/metadados-acoes-fiscalizacao.pdf
+        dest: metadados-acoes-fiscalizacao.pdf
+      - url: https://www.gov.br/anp/pt-br/centrais-de-conteudo/paineis-dinamicos-da-anp/arquivos-dados-brutos-do-painel-dinamico-da-fiscalizacao-do-abastecimento-da-sfi/dados-fisc-1998-2018.xlsx
+        dest: dados-fisc-1998-2018.xlsx
+      - url: https://www.gov.br/anp/pt-br/centrais-de-conteudo/paineis-dinamicos-da-anp/arquivos-dados-brutos-do-painel-dinamico-da-fiscalizacao-do-abastecimento-da-sfi/dados-fisc-a-partir-2019.xlsx
+        dest: dados-fisc-a-partir-2019.xlsx
+    quality:
+    - table: data/trusted/fiscalizacao-abastecimento/fiscalizacao.parquet
+      min_rows: 100000
+      not_null:
+      - data_fiscalizacao
+      - numero_documento
+      accepted_values:
+        uf: *id001
   capacidade-armazenagem-terminais:
     slug: capacidade-armazenagem-terminais
     title: Capacidade de Armazenagem de Terminais
@@ -273,13 +711,26 @@ studies:
       trusted: data/trusted/capacidade-armazenagem-terminais
       refined: data/refined/capacidade-armazenagem-terminais
     pipeline:
-      - step: raw
-        engine: python
-        script: pipelines/python/download_capacidade_armazenagem_terminais.py
-      - step: trusted
-        engine: sql
-        script: pipelines/sql/capacidade-armazenagem-terminais/trusted.sql
-        output: data/trusted/capacidade-armazenagem-terminais/capacidade.parquet
+    - step: raw
+      engine: download
+    - step: trusted
+      engine: sql
+      script: pipelines/sql/capacidade-armazenagem-terminais/trusted.sql
+      outputs:
+      - data/trusted/capacidade-armazenagem-terminais/capacidade.parquet
+    download:
+      base: https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/cat
+      files:
+      - metadados-capacidade-armazenagem-terminais-novo.pdf
+      - capacidade-armazenagem-terminais.csv
+    quality:
+    - table: data/trusted/capacidade-armazenagem-terminais/capacidade.parquet
+      min_rows: 50
+      unique:
+      - tipo
+      - municipio
+      - uf
+      - operador
   movimentacao-terminais-aquaviarios:
     slug: movimentacao-terminais-aquaviarios
     title: Movimentação dos Terminais Aquaviários
@@ -289,16 +740,30 @@ studies:
       trusted: data/trusted/movimentacao-terminais-aquaviarios
       refined: data/refined/movimentacao-terminais-aquaviarios
     pipeline:
-      - step: raw
-        engine: python
-        script: pipelines/python/download_movimentacao_terminais_aquaviarios.py
-      - step: raw_prepare
-        engine: python
-        script: pipelines/python/prepare_movimentacao_terminais.py
-      - step: trusted
-        engine: sql
-        script: pipelines/sql/movimentacao-terminais-aquaviarios/trusted.sql
-        output: data/trusted/movimentacao-terminais-aquaviarios/movimentacao_terminais.parquet
+    - step: raw
+      engine: download
+    - step: raw_prepare
+      engine: python
+      script: pipelines/python/prepare_movimentacao_terminais.py
+    - step: trusted
+      engine: sql
+      script: pipelines/sql/movimentacao-terminais-aquaviarios/trusted.sql
+      outputs:
+      - data/trusted/movimentacao-terminais-aquaviarios/movimentacao_terminais.parquet
+    download:
+      base: https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/arquivos-movimentacao-dos-terminais-aquaviarios
+      files:
+      - metadados-movimentacao-terminais-aquaviarios.pdf
+      - dados-abertos-movimentacao-terminais-aquaviarios.csv
+    quality:
+    - table: data/trusted/movimentacao-terminais-aquaviarios/movimentacao_terminais.parquet
+      min_rows: 10000
+      not_null:
+      - mes_referencia
+      - codigo_terminal
+      no_duplicate_rows:
+        severity: warn
+        note: 6 mil linhas identicas na fonte
   registro-lubrificantes:
     slug: registro-lubrificantes
     title: Registro de Óleos e Graxas Lubrificantes
@@ -308,13 +773,26 @@ studies:
       trusted: data/trusted/registro-lubrificantes
       refined: data/refined/registro-lubrificantes
     pipeline:
-      - step: raw
-        engine: python
-        script: pipelines/python/download_registro_lubrificantes.py
-      - step: trusted
-        engine: sql
-        script: pipelines/sql/registro-lubrificantes/trusted.sql
-        output: data/trusted/registro-lubrificantes/registro_lubrificantes.parquet
+    - step: raw
+      engine: download
+    - step: trusted
+      engine: sql
+      script: pipelines/sql/registro-lubrificantes/trusted.sql
+      outputs:
+      - data/trusted/registro-lubrificantes/registro_lubrificantes.parquet
+    download:
+      base: https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/arquivos-registro
+      files:
+      - metadados-registro-produtos.pdf
+      - dados-abertos-registro-produtos.csv
+    quality:
+    - table: data/trusted/registro-lubrificantes/registro_lubrificantes.parquet
+      min_rows: 1000
+      not_null:
+      - registro
+      no_duplicate_rows:
+        severity: warn
+        note: 407 linhas identicas na fonte
   processamento-petroleo-derivados:
     slug: processamento-petroleo-derivados
     title: Processamento de Petróleo e Produção de Derivados
@@ -324,13 +802,43 @@ studies:
       trusted: data/trusted/processamento-petroleo-derivados
       refined: data/refined/processamento-petroleo-derivados
     pipeline:
-      - step: raw
-        engine: python
-        script: pipelines/python/download_processamento_petroleo_derivados.py
-      - step: trusted
-        engine: sql
-        script: pipelines/sql/processamento-petroleo-derivados/trusted.sql
-        output: data/trusted/processamento-petroleo-derivados/processamento.parquet
+    - step: raw
+      engine: download
+    - step: trusted
+      engine: sql
+      script: pipelines/sql/processamento-petroleo-derivados/trusted.sql
+      outputs:
+      - data/trusted/processamento-petroleo-derivados/processamento.parquet
+      - data/trusted/processamento-petroleo-derivados/derivados_refinaria.parquet
+    download:
+      base: https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/pppd
+      files:
+      - metadados-processamento-petroleo.pdf
+      - metadados-producao-derivados-petroleo-por-refinaria.pdf
+      - processamento-petroleo-m3-1990-2025.csv
+      - producao-derivados-petroleo-por-refinaria-m3-1990-2025.csv
+      - producao-derivados-centrais-petroquimicas-m3-2001-2025.csv
+      - producao-derivados-outros-produtores-m3-2001-2025.csv
+      - producao-derivados-xisto-m3-2001-2025.csv
+      - producao-gas-combustivel-1000m3-2000-2025.csv
+    quality:
+    - table: data/trusted/processamento-petroleo-derivados/processamento.parquet
+      min_rows: 1000
+      unique:
+      - ano
+      - mes_abrev
+      - refinaria
+      - materia_prima
+    - table: data/trusted/processamento-petroleo-derivados/derivados_refinaria.parquet
+      min_rows: 1000
+      unique:
+        columns:
+        - ano
+        - mes_abrev
+        - refinaria
+        - produto
+        severity: warn
+        note: 12 linhas repetidas na fonte
   producao-biocombustiveis:
     slug: producao-biocombustiveis
     title: Produção de Biocombustíveis
@@ -340,13 +848,45 @@ studies:
       trusted: data/trusted/producao-biocombustiveis
       refined: data/refined/producao-biocombustiveis
     pipeline:
-      - step: raw
-        engine: python
-        script: pipelines/python/download_producao_biocombustiveis.py
-      - step: trusted
-        engine: sql
-        script: pipelines/sql/producao-biocombustiveis/trusted.sql
-        output: data/trusted/producao-biocombustiveis/producao_biocombustiveis.parquet
+    - step: raw
+      engine: download
+    - step: trusted
+      engine: sql
+      script: pipelines/sql/producao-biocombustiveis/trusted.sql
+      outputs:
+      - data/trusted/producao-biocombustiveis/producao_biodiesel.parquet
+      - data/trusted/producao-biocombustiveis/producao_etanol.parquet
+    download:
+      base: https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/arquivos-producao-de-biocombustiveis
+      files:
+      - metadados-biodiesel.pdf
+      - metadados-producao-etanol.pdf
+      - producao-biodiesel-m3-2005-2023.csv
+      - producao-biodiesel-m3-2024-2026.csv
+      - producao-etanol-anidro-hidratado-m3-2012-2026.csv
+    quality:
+    - table: data/trusted/producao-biocombustiveis/producao_biodiesel.parquet
+      min_rows: 1000
+      not_null:
+      - ano
+      - mes
+      unique:
+      - ano
+      - mes
+      - grande_regiao
+      - uf
+      - produtor
+      range:
+        mes:
+          min: 1
+          max: 12
+    - table: data/trusted/producao-biocombustiveis/producao_etanol.parquet
+      min_rows: 1000
+      unique:
+      - ano
+      - mes_abrev
+      - uf
+      - produto
   producao-por-estado:
     slug: producao-por-estado
     title: Produção de Petróleo e GN por Estado
@@ -356,13 +896,42 @@ studies:
       trusted: data/trusted/producao-por-estado
       refined: data/refined/producao-por-estado
     pipeline:
-      - step: raw
-        engine: python
-        script: pipelines/python/download_producao_por_estado.py
-      - step: trusted
-        engine: sql
-        script: pipelines/sql/producao-por-estado/trusted.sql
-        output: data/trusted/producao-por-estado/producao_estado.parquet
+    - step: raw
+      engine: download
+    - step: trusted
+      engine: sql
+      script: pipelines/sql/producao-por-estado/trusted.sql
+      outputs:
+      - data/trusted/producao-por-estado/producao_petroleo.parquet
+      - data/trusted/producao-por-estado/producao_gas_natural.parquet
+    download:
+      base: https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/ppgn-el
+      files:
+      - metadados-producao-petroleo.pdf
+      - metadados-producao-gn.pdf
+      - producao-petroleo-m3.csv
+      - producao-gas-natural-1000m3.csv
+      - producao-lgn-m3.csv
+      - queima-e-perda-gn-1000m3.csv
+      - consumo-proprio-gn1000m3.csv
+      - gn-disponivel-1000m3.csv
+    quality:
+    - table: data/trusted/producao-por-estado/producao_petroleo.parquet
+      min_rows: 1000
+      unique:
+      - ano
+      - mes_abrev
+      - uf
+      - produto
+      - localizacao
+    - table: data/trusted/producao-por-estado/producao_gas_natural.parquet
+      min_rows: 1000
+      unique:
+      - ano
+      - mes_abrev
+      - uf
+      - produto
+      - localizacao
   producao-por-poco:
     slug: producao-por-poco
     title: Produção de Petróleo e GN por Poço
@@ -372,16 +941,23 @@ studies:
       trusted: data/trusted/producao-por-poco
       refined: data/refined/producao-por-poco
     pipeline:
-      - step: raw
-        engine: python
-        script: pipelines/python/download_producao_por_poco.py
-      - step: raw_prepare
-        engine: python
-        script: pipelines/python/prepare_producao_por_poco.py
-      - step: trusted
-        engine: sql
-        script: pipelines/sql/producao-por-poco/trusted.sql
-        output: data/trusted/producao-por-poco/producao_poco.parquet
+    - step: raw
+      engine: python
+      script: pipelines/python/download_producao_por_poco.py
+    - step: raw_prepare
+      engine: python
+      script: pipelines/python/prepare_producao_por_poco.py
+    - step: trusted
+      engine: sql
+      script: pipelines/sql/producao-por-poco/trusted.sql
+      outputs:
+      - data/trusted/producao-por-poco/producao_poco.parquet
+    quality:
+    - table: data/trusted/producao-por-poco/producao_poco.parquet
+      min_rows: 1000
+      no_duplicate_rows:
+        severity: warn
+        note: 3,5 mil linhas identicas apos o prepare
   importacoes-exportacoes:
     slug: importacoes-exportacoes
     title: Importações e Exportações
@@ -391,10 +967,53 @@ studies:
       trusted: data/trusted/importacoes-exportacoes
       refined: data/refined/importacoes-exportacoes
     pipeline:
-      - step: raw
-        engine: python
-        script: pipelines/python/download_importacoes_exportacoes.py
-      - step: trusted
-        engine: sql
-        script: pipelines/sql/importacoes-exportacoes/trusted.sql
-        output: data/trusted/importacoes-exportacoes/importacoes_exportacoes.parquet
+    - step: raw
+      engine: download
+    - step: trusted
+      engine: sql
+      script: pipelines/sql/importacoes-exportacoes/trusted.sql
+      outputs:
+      - data/trusted/importacoes-exportacoes/ie_derivados.parquet
+      - data/trusted/importacoes-exportacoes/ie_etanol.parquet
+      - data/trusted/importacoes-exportacoes/ie_petroleo.parquet
+    download:
+      base: https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/ie
+      files:
+      - src: derivados/metadados-importacao-exportacao-derivados-1.pdf
+        dest: metadados-derivados.pdf
+      - src: derivados/importacoes-exportacoes-derivados-2000-2025.csv
+        dest: importacoes-exportacoes-derivados.csv
+      - src: etanol/metadados-importacao-exportacao-etanol-1.pdf
+        dest: metadados-etanol.pdf
+      - src: etanol/importacoes-exportacoes-etanol-2012-2025.csv
+        dest: importacoes-exportacoes-etanol.csv
+      - src: gn/metadados-importacao-gas-natural-1.pdf
+        dest: metadados-gas-natural.pdf
+      - src: gn/importacao-gas-natural-2000-2025.csv
+        dest: importacao-gas-natural.csv
+      - src: petroleo/metadados-importacao-exportacao-petroleo-1.pdf
+        dest: metadados-petroleo.pdf
+      - src: petroleo/importacoes-exportacoes-petroleo-2000-2025.csv
+        dest: importacoes-exportacoes-petroleo.csv
+    quality:
+    - table: data/trusted/importacoes-exportacoes/ie_derivados.parquet
+      min_rows: 100
+      unique:
+      - ano
+      - mes_abrev
+      - produto
+      - operacao
+    - table: data/trusted/importacoes-exportacoes/ie_etanol.parquet
+      min_rows: 100
+      unique:
+      - ano
+      - mes_abrev
+      - produto
+      - operacao
+    - table: data/trusted/importacoes-exportacoes/ie_petroleo.parquet
+      min_rows: 100
+      unique:
+      - ano
+      - mes_abrev
+      - produto
+      - operacao

@@ -1,0 +1,30 @@
+name: Portal ANP
+
+# Verifica toda semana se as URLs configuradas ainda respondem no portal da ANP.
+# Falha (e o GitHub avisa por e-mail) quando um arquivo muda de endereço ou some.
+on:
+  schedule:
+    - cron: "0 9 * * 1"  # segundas, 06:00 em Brasília
+  workflow_dispatch:
+
+jobs:
+  links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Verificar URLs de download
+        shell: bash
+        run: |
+          status=0
+          for slug in $(python -c "import yaml;c=yaml.safe_load(open('config/monorepo.yaml'));print(' '.join(s for s,v in c['studies'].items() if 'download' in v))"); do
+            python pipelines/python/download.py "$slug" --check || status=1
+          done
+          python pipelines/python/download_pmqc.py --years 2016 2017 2018 2019 2020 2021 2022 2023 2024 2025 2026 --check || status=1
+          python pipelines/python/download_serie_historica_precos.py --check || status=1
+          python pipelines/python/download_producao_por_poco.py --check || status=1
+          exit $status

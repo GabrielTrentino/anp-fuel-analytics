@@ -1,5 +1,7 @@
 -- Trusted: vendas anuais por município (gasolina, diesel, etanol, GLP) — 1990+
 -- Requer: prepare_vendas_derivados_raw.py (gera _prepared/vendas_municipal_*.csv)
+-- Anomalia da fonte: os CSVs anuais por município repetem linhas idênticas
+-- (~23 mil, ex.: 1990 / 1100015 / ÓLEO DIESEL duas vezes). SELECT DISTINCT remove.
 
 CREATE OR REPLACE TABLE trusted AS
 WITH unioned AS (
@@ -15,7 +17,7 @@ WITH unioned AS (
     SELECT ano, grande_regiao, uf, produto, cod_ibge, municipio, vendas_m3
     FROM read_csv('{{RAW_DIR}}/_prepared/vendas_municipal_glp.csv', header=TRUE, auto_detect=TRUE)
 )
-SELECT
+SELECT DISTINCT
     CAST(ano AS INTEGER) AS ano,
     trim(grande_regiao) AS grande_regiao,
     trim(uf) AS uf,

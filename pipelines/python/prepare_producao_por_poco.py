@@ -1,8 +1,8 @@
 """Prepare producao-por-poco: consolida CSVs extraidos dos ZIPs em um unico CSV."""
 from __future__ import annotations
 
-import sys
 import re
+import sys
 import unicodedata
 from pathlib import Path
 

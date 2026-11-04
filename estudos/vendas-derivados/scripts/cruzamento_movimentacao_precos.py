@@ -48,8 +48,8 @@ def main() -> None:
         lines += [
             "## Precos LPC",
             "",
-            f"| Metrica | Vendas | Precos |",
-            f"|---------|--------|--------|",
+            "| Metrica | Vendas | Precos |",
+            "|---------|--------|--------|",
             f"| Produtos vendas | {sorted(vd_prods)} |",
             f"| Produtos precos (upper) | {sorted(pre_prods)} |",
             "",
