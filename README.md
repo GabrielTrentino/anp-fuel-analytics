@@ -67,6 +67,7 @@ py pipelines/run.py tancagem-abastecimento trusted      # uma etapa
 py pipelines/run.py pmqc check                          # só os testes de qualidade
 py pipelines/run.py all --skip-raw                      # todos os estudos, sem baixar de novo
 py pipelines/run.py catalog                             # recria data/anp.duckdb (uma view por tabela)
+py pipelines/run.py paineis                             # regera os extratos do site em paineis/
 ```
 
 **RAW** permanece em Python. Estudos simples declaram os arquivos no bloco `download` do [`config/monorepo.yaml`](config/monorepo.yaml) e usam o downloader comum (`pipelines/core/download.py`: retry, escrita atômica e manifesto `data/raw/{slug}/_manifest.json` com URL, tamanho, sha256 e data). Estudos com regras próprias de nomes (PMQC, série histórica de preços, produção por poço) têm script em `pipelines/python/`, que monta a lista e chama o mesmo downloader. Todos aceitam `--force` (rebaixar) e `--check` (só testar as URLs).
@@ -81,10 +82,18 @@ O bloco `quality` de cada estudo declara regras sobre as tabelas geradas (`min_r
 
 `py pipelines/run.py catalog` cria `data/anp.duckdb` com uma view por saída (schema = estudo, ex.: `pmqc.trusted_pmqc`) e `meta.quality` com o resultado dos testes. Abra com `duckdb -ui data/anp.duckdb` (navegador de tabelas no browser), DBeaver ou Power BI.
 
-### CI
+### Painéis públicos
+
+`paineis/` tem um site em [Evidence](https://github.com/evidence-dev/evidence) (SQL + Markdown) com preços,
+PMQC, vendas, postos e o relatório de qualidade. `py pipelines/run.py paineis` regera os extratos agregados
+(`paineis/sources/anp/anp_paineis.duckdb`) e o workflow `paineis.yml` publica o site no GitHub Pages.
+Detalhes em [`paineis/README.md`](paineis/README.md).
+
+## CI
 
 - [`ci.yml`](.github/workflows/ci.yml): a cada push/PR roda `ruff` e `pytest` (Ubuntu e Windows). Os testes validam o YAML contra scripts e SQL, executam SQLs trusted com fixtures pequenas em `tests/fixtures/` e cobrem download e regras de qualidade.
 - [`portal.yml`](.github/workflows/portal.yml): toda segunda verifica se as URLs do portal ainda respondem.
+- [`paineis.yml`](.github/workflows/paineis.yml): monta o site Evidence; em PR só valida, na `main` publica no GitHub Pages.
 
 Para rodar localmente: `pip install -r requirements-dev.txt`, depois `ruff check .` e `pytest`.
 

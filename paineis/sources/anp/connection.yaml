@@ -1,0 +1,4 @@
+name: anp
+type: duckdb
+options:
+  filename: anp_paineis.duckdb
