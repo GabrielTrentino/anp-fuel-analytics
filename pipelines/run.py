@@ -5,6 +5,7 @@
     py pipelines/run.py <slug> check           # só os testes de qualidade
     py pipelines/run.py all [--skip-raw]       # todos os estudos
     py pipelines/run.py catalog                # recria data/anp.duckdb com uma view por saída
+    py pipelines/run.py paineis                # regera os extratos do site (paineis/sources/anp)
     py pipelines/run.py --list                 # estudos e etapas
 """
 from __future__ import annotations
@@ -134,7 +135,7 @@ def run_study(slug: str, steps_filter: list[str], skip_raw: bool = False) -> boo
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Executa pipeline de um estudo")
-    parser.add_argument("slug", nargs="?", help="slug do estudo, 'all' ou 'catalog'")
+    parser.add_argument("slug", nargs="?", help="slug do estudo, 'all', 'catalog' ou 'paineis'")
     parser.add_argument("steps", nargs="*", help="etapas (raw, trusted, ..., check). Omitir = todas")
     parser.add_argument("--list", action="store_true", help="lista estudos e etapas")
     parser.add_argument("--skip-raw", action="store_true", help="pula download/prepare (usa data/raw atual)")
@@ -147,6 +148,12 @@ def main() -> None:
         return
     if args.slug == "catalog":
         build_catalog(cfg, REPO_ROOT)
+        return
+    if args.slug == "paineis":
+        sys.path.insert(0, str(REPO_ROOT / "paineis"))
+        from exportar import exportar
+
+        exportar(REPO_ROOT)
         return
 
     slugs = list(cfg["studies"]) if args.slug == "all" else [args.slug]

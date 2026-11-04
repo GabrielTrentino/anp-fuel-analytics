@@ -66,7 +66,7 @@ def run_checks(item: dict, repo_root: Path, con: duckdb.DuckDBPyConnection | Non
         return [CheckResult(table, "exists", "arquivo existe", False, "error")]
 
     src = f"read_parquet('{path}')"
-    total = con.sql(f"SELECT count(*) FROM {src}").fetchone()[0]
+    total = con.sql(f"SELECT count(*) FROM {src}").fetchall()[0][0]
     columns = {r[0] for r in con.sql(f"DESCRIBE SELECT * FROM {src}").fetchall()}
 
     def missing(cols: list[str]) -> list[str]:
@@ -91,7 +91,7 @@ def run_checks(item: dict, repo_root: Path, con: duckdb.DuckDBPyConnection | Non
                 add(rule, f"colunas inexistentes: {bad}", len(bad), "error", note)
                 continue
             for c in cols:
-                n = con.sql(f"SELECT count(*) FROM {src} WHERE {_q(c)} IS NULL").fetchone()[0]
+                n = con.sql(f"SELECT count(*) FROM {src} WHERE {_q(c)} IS NULL").fetchall()[0][0]
                 add(rule, c, n, sev, note)
 
         elif rule == "unique":
@@ -100,13 +100,13 @@ def run_checks(item: dict, repo_root: Path, con: duckdb.DuckDBPyConnection | Non
                 add(rule, f"colunas inexistentes: {bad}", len(bad), "error", note)
                 continue
             key = ", ".join(_q(c) for c in cols)
-            n = con.sql(f"SELECT count(*) - count(DISTINCT ({key})) FROM {src}").fetchone()[0]
+            n = con.sql(f"SELECT count(*) - count(DISTINCT ({key})) FROM {src}").fetchall()[0][0]
             add(rule, "+".join(cols), n, sev, note)
 
         elif rule == "no_duplicate_rows":
             enabled, sev, note = _split(spec, "enabled")
             if enabled:
-                distinct = con.sql(f"SELECT count(*) FROM (SELECT DISTINCT * FROM {src})").fetchone()[0]
+                distinct = con.sql(f"SELECT count(*) FROM (SELECT DISTINCT * FROM {src})").fetchall()[0][0]
                 add(rule, "linhas idênticas", total - distinct, sev, note)
 
         elif rule == "accepted_values":
@@ -118,7 +118,7 @@ def run_checks(item: dict, repo_root: Path, con: duckdb.DuckDBPyConnection | Non
                 values = ", ".join("'" + str(v).replace("'", "''") + "'" for v in allowed)
                 n = con.sql(
                     f"SELECT count(*) FROM {src} WHERE {_q(c)} IS NOT NULL AND {_q(c)} NOT IN ({values})"
-                ).fetchone()[0]
+                ).fetchall()[0][0]
                 add(rule, f"{c} em {len(allowed)} valores", n, sev, note)
 
         elif rule == "range":
@@ -132,7 +132,7 @@ def run_checks(item: dict, repo_root: Path, con: duckdb.DuckDBPyConnection | Non
                     conds.append(f"{_q(c)} < {bounds['min']}")
                 if "max" in bounds:
                     conds.append(f"{_q(c)} > {bounds['max']}")
-                n = con.sql(f"SELECT count(*) FROM {src} WHERE {' OR '.join(conds)}").fetchone()[0]
+                n = con.sql(f"SELECT count(*) FROM {src} WHERE {' OR '.join(conds)}").fetchall()[0][0]
                 add(rule, f"{c} em [{bounds.get('min', '-inf')}, {bounds.get('max', 'inf')}]", n, sev, note)
 
     unknown = set(item) - set(RULES) - {"table"}

@@ -1,0 +1,55 @@
+name: Painéis
+
+# Monta o site Evidence a partir de paineis/sources/anp/anp_paineis.duckdb
+# (gerado localmente por `py pipelines/run.py paineis` e versionado).
+# Em PR só valida o build; na main publica no GitHub Pages.
+
+on:
+  push:
+    branches: [main]
+    paths: ["paineis/**", ".github/workflows/paineis.yml"]
+  pull_request:
+    paths: ["paineis/**", ".github/workflows/paineis.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: paineis-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: paineis
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: paineis/package-lock.json
+      - run: npm ci
+      - run: npm run sources
+      - run: npm run build:strict
+        env:
+          EVIDENCE_BUILD_DIR: ./build/anp-fuel-analytics
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: paineis/build/anp-fuel-analytics
+
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
